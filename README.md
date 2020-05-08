@@ -1,5 +1,5 @@
 # pytest-github-actions-annotate-failures
-Pytest plugin to annotate failed tests with a workflow command for GitHub Actions
+Pytest plugin to annotate failed tests with a [workflow command for GitHub Actions](https://help.github.com/en/actions/reference/workflow-commands-for-github-actions)
 
 ## Usage
 Just install and run pytest with this plugin in your workflow. For example,
