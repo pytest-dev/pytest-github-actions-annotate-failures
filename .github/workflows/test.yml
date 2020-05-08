@@ -27,6 +27,9 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
 
+    - name: Install plugin
+      run: python setup.py install
+
     - name: Run tests
       run: pytest
       env:
