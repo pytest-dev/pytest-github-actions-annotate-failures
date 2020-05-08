@@ -1,4 +1,4 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 
 with open("./README.md") as f:
     long_description= f.read()
@@ -15,7 +15,7 @@ setup(
     classifiers=[
         "Framework :: Pytest",
     ],
-    packages=["pytest_github_actions_annotate_failures"],
+    packages=find_packages(),
     entry_points={
         "pytest11": [
             "pytest_github_actions_annotate_failures = pytest_github_actions_annotate_failures.plugin",
