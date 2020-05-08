@@ -10,6 +10,7 @@ setup(
     long_description_content_type="text/markdown",
     author="utgwkk",
     author_email="utagawakiki@gmail.com",
+    url="https://github.com/utgwkk/pytest-github-actions-annotate-failures",
     license="MIT",
     classifiers=[
         "Framework :: Pytest",
