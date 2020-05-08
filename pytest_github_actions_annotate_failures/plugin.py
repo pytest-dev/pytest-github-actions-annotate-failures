@@ -21,10 +21,10 @@ def _error_workflow_command(filesystempath, lineno, longrepr):
             return '\n::error file={}::{}'.format(filesystempath, longrepr)
     else:
         if longrepr is None:
-            return '\n::error file={},lineno={}'.format(filesystempath, lineno)
+            return '\n::error file={},line={}'.format(filesystempath, lineno)
         else:
             longrepr = _escape(longrepr)
-            return '\n::error file={},lineno={}::{}'.format(filesystempath, lineno, longrepr)
+            return '\n::error file={},line={}::{}'.format(filesystempath, lineno, longrepr)
 
 def _escape(s: str):
     return s.replace('%', '%25').replace('\r', '%0D').replace('\n', '%0A')
