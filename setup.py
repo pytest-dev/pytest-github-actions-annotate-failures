@@ -6,6 +6,7 @@ with open("./README.md") as f:
 setup(
     name="pytest-github-actions-annotate-failures",
     version="0.0.1",
+    description="pytest plugin to annotate failed tests with a workflow command for GitHub Actions",
     long_description=long_description,
     long_description_content_type="text/markdown",
     author="utgwkk",
