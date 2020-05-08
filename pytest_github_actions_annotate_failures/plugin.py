@@ -1,4 +1,11 @@
+import os
+
 def pytest_runtest_logreport(report):
+    # enable only in a workflow of GitHub Actions
+    # ref: https://help.github.com/en/actions/configuring-and-managing-workflows/using-environment-variables#default-environment-variables
+    if not os.environ.get('GITHUB_ACTIONS'):
+        return
+
     if report.outcome != 'failed':
         return
 
