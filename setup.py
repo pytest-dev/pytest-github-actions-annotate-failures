@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 with open("./README.md") as f:
-    long_description= f.read()
+    long_description = f.read()
 
 setup(
     name="pytest-github-actions-annotate-failures",
