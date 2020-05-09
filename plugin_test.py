@@ -1,6 +1,21 @@
 pytest_plugins = 'pytester'
 import pytest
 
+def test_annotation_succeed_no_output(testdir):
+    testdir.makepyfile(
+        '''
+        import pytest
+        pytest_plugins = 'pytest_github_actions_annotate_failures'
+
+        def test_success():
+            assert 1
+        '''
+    )
+    result = testdir.runpytest()
+    result.stdout.no_fnmatch_line(
+        '::error file=test_annotation_succeed_no_output.py*',
+    )
+
 def test_annotation_fail(testdir):
     testdir.makepyfile(
         '''
