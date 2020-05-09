@@ -22,4 +22,7 @@ setup(
             "pytest_github_actions_annotate_failures = pytest_github_actions_annotate_failures.plugin",
         ],
     },
+    install_requires=[
+        "pytest>=4.0.0",
+    ],
 )
