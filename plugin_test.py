@@ -28,7 +28,7 @@ def test_annotation_fail(testdir):
     )
     result = testdir.runpytest()
     result.stdout.fnmatch_lines([
-        '::error file=test_annotation_fail.py,line=4::def test_fail():%0A*',
+        '::error file=test_annotation_fail.py,line=4::def test_fail():*',
     ])
 
 def test_annotation_exception(testdir):
@@ -44,5 +44,5 @@ def test_annotation_exception(testdir):
     )
     result = testdir.runpytest()
     result.stdout.fnmatch_lines([
-        '::error file=test_annotation_exception.py,line=4::def test_fail():%0A*',
+        '::error file=test_annotation_exception.py,line=4::def test_fail():*',
     ])
