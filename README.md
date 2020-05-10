@@ -30,8 +30,6 @@ jobs:
       run: pip install pytest-github-actions-annotate-failures
 
     - run: pytest
-      env:
-        PYTEST_PLUGINS: pytest_github_actions_annotate_failures
 ```
 
 ## Screenshot
