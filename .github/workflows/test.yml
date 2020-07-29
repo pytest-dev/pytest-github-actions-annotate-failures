@@ -23,5 +23,3 @@ jobs:
       run: python setup.py install
 
     - run: pytest
-      env:
-        PYTEST_PLUGINS: pytest_github_actions_annotate_failures
