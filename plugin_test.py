@@ -12,8 +12,7 @@ def test_annotation_succeed_no_output(testdir):
         '''
     )
     testdir.monkeypatch.setenv('GITHUB_ACTIONS', 'true')
-    testdir._method = 'subprocess'
-    result = testdir.runpytest()
+    result = testdir.runpytest_subprocess()
     result.stdout.no_fnmatch_line(
         '::error file=test_annotation_succeed_no_output.py*',
     )
@@ -29,8 +28,7 @@ def test_annotation_fail(testdir):
         '''
     )
     testdir.monkeypatch.setenv('GITHUB_ACTIONS', 'true')
-    testdir._method = 'subprocess'
-    result = testdir.runpytest()
+    result = testdir.runpytest_subprocess()
     result.stdout.fnmatch_lines([
         '::error file=test_annotation_fail.py,line=4::def test_fail():*',
     ])
@@ -47,8 +45,7 @@ def test_annotation_exception(testdir):
         '''
     )
     testdir.monkeypatch.setenv('GITHUB_ACTIONS', 'true')
-    testdir._method = 'subprocess'
-    result = testdir.runpytest()
+    result = testdir.runpytest_subprocess()
     result.stdout.fnmatch_lines([
         '::error file=test_annotation_exception.py,line=4::def test_fail():*',
     ])
@@ -64,8 +61,7 @@ def test_annotation_fail_disabled_outside_workflow(testdir):
         '''
     )
     testdir.monkeypatch.setenv('GITHUB_ACTIONS', '')
-    testdir._method = 'subprocess'
-    result = testdir.runpytest()
+    result = testdir.runpytest_subprocess()
     result.stdout.no_fnmatch_line(
         '::error file=test_annotation_fail_disabled_outside_workflow.py*',
     )
