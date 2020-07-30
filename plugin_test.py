@@ -52,3 +52,20 @@ def test_annotation_exception(testdir):
     result.stdout.fnmatch_lines([
         '::error file=test_annotation_exception.py,line=4::def test_fail():*',
     ])
+
+def test_annotation_fail_disabled_outside_workflow(testdir):
+    testdir.makepyfile(
+        '''
+        import pytest
+        pytest_plugins = 'pytest_github_actions_annotate_failures'
+
+        def test_fail():
+            assert 0
+        '''
+    )
+    testdir.monkeypatch.setenv('GITHUB_ACTIONS', '')
+    testdir._method = 'subprocess'
+    result = testdir.runpytest()
+    result.stdout.no_fnmatch_line(
+        '::error file=test_annotation_fail_disabled_outside_workflow.py*',
+    )
