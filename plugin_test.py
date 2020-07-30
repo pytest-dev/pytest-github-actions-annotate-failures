@@ -11,6 +11,8 @@ def test_annotation_succeed_no_output(testdir):
             assert 1
         '''
     )
+    testdir.monkeypatch.setenv('GITHUB_ACTIONS', '1')
+    testdir._method = 'subprocess'
     result = testdir.runpytest()
     result.stdout.no_fnmatch_line(
         '::error file=test_annotation_succeed_no_output.py*',
@@ -26,6 +28,8 @@ def test_annotation_fail(testdir):
             assert 0
         '''
     )
+    testdir.monkeypatch.setenv('GITHUB_ACTIONS', '1')
+    testdir._method = 'subprocess'
     result = testdir.runpytest()
     result.stdout.fnmatch_lines([
         '::error file=test_annotation_fail.py,line=4::def test_fail():*',
@@ -42,6 +46,8 @@ def test_annotation_exception(testdir):
             assert 1
         '''
     )
+    testdir.monkeypatch.setenv('GITHUB_ACTIONS', '1')
+    testdir._method = 'subprocess'
     result = testdir.runpytest()
     result.stdout.fnmatch_lines([
         '::error file=test_annotation_exception.py,line=4::def test_fail():*',
