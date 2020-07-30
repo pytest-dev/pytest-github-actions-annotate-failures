@@ -20,6 +20,21 @@ jobs:
     - name: Install dependencies for build
       run: pip install --upgrade setuptools wheel
 
+    - name: Get version from setup.py
+      id: get-version
+      run: echo ::set-output name=version::v`python setup.py -V`
+
+    - name: Get tag
+      id: get-tag
+      run: echo ::set-output name=tag-name::${GITHUB_REF#refs/tags/}
+
+    - name: Check version mismatch
+      run: |
+        if [[ "${{ steps.get-version.outputs.version }}" != "${{ steps.get-tag.outputs.tag-name }}" ]]; then
+          echo ::error file=setup.py::Version mismatch
+          exit 1
+        fi
+
     - name: Build
       run: python setup.py sdist bdist_wheel
 
