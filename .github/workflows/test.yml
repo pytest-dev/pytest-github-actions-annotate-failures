@@ -20,6 +20,7 @@ jobs:
           - python-version: 2.7
             pytest-version: 5.4.3
 
+    name: Python ${{ matrix.python-version }}, pytest ${{ matrix.pytest-version }}
     steps:
     - uses: actions/checkout@v2
 
