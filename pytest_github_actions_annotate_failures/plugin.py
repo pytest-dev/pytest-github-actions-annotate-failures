@@ -1,3 +1,4 @@
+from __future__ import print_function
 import os
 
 def pytest_runtest_logreport(report):
@@ -33,5 +34,5 @@ def _error_workflow_command(filesystempath, lineno, longrepr):
             longrepr = _escape(longrepr)
             return '\n::error file={},line={}::{}'.format(filesystempath, lineno, longrepr)
 
-def _escape(s: str):
+def _escape(s):
     return s.replace('%', '%25').replace('\r', '%0D').replace('\n', '%0A')
