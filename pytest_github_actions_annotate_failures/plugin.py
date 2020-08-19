@@ -1,3 +1,4 @@
+from __future__ import print_function
 import os
 
 def pytest_runtest_logreport(report):
