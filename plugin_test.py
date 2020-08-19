@@ -2,6 +2,16 @@ pytest_plugins = 'pytester'
 import pytest
 from packaging import version
 
+# result.stdout.no_fnmatch_line() is added to testdir on pytest 5.3.0
+# https://docs.pytest.org/en/stable/changelog.html#pytest-5-3-0-2019-11-19
+def no_fnmatch_line(result, pattern):
+    if version.parse(pytest.__version__) >= version.parse('5.3.0'):
+        result.stdout.no_fnmatch_line(
+            pattern + '*',
+        )
+    else:
+        assert pattern not in result.stdout.str()
+
 def test_annotation_succeed_no_output(testdir):
     testdir.makepyfile(
         '''
@@ -15,14 +25,7 @@ def test_annotation_succeed_no_output(testdir):
     testdir.monkeypatch.setenv('GITHUB_ACTIONS', 'true')
     result = testdir.runpytest_subprocess()
 
-    # no_fnmatch_line() is added to testdir on pytest 5.3.0
-    # https://docs.pytest.org/en/stable/changelog.html#pytest-5-3-0-2019-11-19
-    if version.parse(pytest.__version__) >= version.parse('5.3.0'):
-        result.stdout.no_fnmatch_line(
-            '::error file=test_annotation_succeed_no_output.py*',
-        )
-    else:
-        assert '::error file=test_annotation_succeed_no_output.py' not in result.stdout.str()
+    no_fnmatch_line(result, '::error file=test_annotation_succeed_no_output.py')
 
 def test_annotation_fail(testdir):
     testdir.makepyfile(
@@ -69,6 +72,4 @@ def test_annotation_fail_disabled_outside_workflow(testdir):
     )
     testdir.monkeypatch.setenv('GITHUB_ACTIONS', '')
     result = testdir.runpytest_subprocess()
-    result.stdout.no_fnmatch_line(
-        '::error file=test_annotation_fail_disabled_outside_workflow.py*',
-    )
+    no_fnmatch_line(result, '::error file=test_annotation_fail_disabled_outside_workflow.py')
