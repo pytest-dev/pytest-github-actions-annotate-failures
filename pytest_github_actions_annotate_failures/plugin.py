@@ -11,7 +11,8 @@ def pytest_runtest_logreport(report):
         return
 
     # collect information to be annotated
-    filesystempath, lineno, _ = report.location
+    filesystem_relativepath, lineno, _ = report.location
+    filesystempath = filesystem_relativepath.replace('../', '')
 
     # 0-index to 1-index
     lineno += 1
