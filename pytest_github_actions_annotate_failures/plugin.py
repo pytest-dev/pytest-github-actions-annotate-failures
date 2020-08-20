@@ -11,8 +11,15 @@ def pytest_runtest_logreport(report):
         return
 
     # collect information to be annotated
-    filesystem_relativepath, lineno, _ = report.location
-    filesystempath = filesystem_relativepath.replace('../', '')
+    filesystempath, lineno, _ = report.location
+
+    # try to convert to absolute path in GitHub Actions
+    workspace = os.environ.get('GITHUB_WORKSPACE')
+    if workspace:
+        full_path = os.path.abspath(filesystempath)
+        rel_path = os.path.relpath(full_path, workspace)
+        if not rel_path.startswith('..'):
+            filesystempath = rel_path
 
     # 0-index to 1-index
     lineno += 1
