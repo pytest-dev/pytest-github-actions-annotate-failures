@@ -1,5 +1,6 @@
 pytest_plugins = 'pytester'
 import pytest
+import os
 from packaging import version
 
 # result.stdout.no_fnmatch_line() is added to testdir on pytest 5.3.0
@@ -73,3 +74,22 @@ def test_annotation_fail_disabled_outside_workflow(testdir):
     testdir.monkeypatch.setenv('GITHUB_ACTIONS', '')
     result = testdir.runpytest_subprocess()
     no_fnmatch_line(result, '::error file=test_annotation_fail_disabled_outside_workflow.py')
+
+def test_annotation_fail_cwd(testdir):
+    testdir.makepyfile(
+        '''
+        import pytest
+        pytest_plugins = 'pytest_github_actions_annotate_failures'
+
+        def test_fail():
+            assert 0
+        '''
+    )
+    testdir.monkeypatch.setenv('GITHUB_ACTIONS', 'true')
+    testdir.monkeypatch.setenv('GITHUB_WORKSPACE', os.path.dirname(str(testdir.tmpdir)))
+    testdir.mkdir('foo')
+    testdir.makefile('.ini', pytest='[pytest]\ntestpaths=..')
+    result = testdir.runpytest_subprocess('--rootdir=foo')
+    result.stdout.fnmatch_lines([
+        '::error file=test_annotation_fail_cwd.py,line=4::def test_fail():*',
+    ])
