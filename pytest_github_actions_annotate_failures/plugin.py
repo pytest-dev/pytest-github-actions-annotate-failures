@@ -1,6 +1,7 @@
 from __future__ import print_function
 import os
 import pytest
+from collections import OrderedDict
 
 @pytest.hookimpl(tryfirst=True, hookwrapper=True)
 def pytest_runtest_makereport(item, call):
@@ -44,18 +45,19 @@ def pytest_runtest_makereport(item, call):
 
 
 def _error_workflow_command(filesystempath, lineno, longrepr):
-    if lineno is None:
-        if longrepr is None:
-            return '\n::error file={}'.format(filesystempath)
-        else:
-            longrepr = _escape(longrepr)
-            return '\n::error file={}::{}'.format(filesystempath, longrepr)
+    # Build collection of arguments. Ordering is strict for easy testing
+    details_dict = OrderedDict()
+    details_dict["file"] = filesystempath
+    if lineno is not None:
+        details_dict["line"] = lineno
+
+    details = ",".join("{}={}".format(k,v) for k,v in details_dict.items())
+
+    if longrepr is None:
+        return '\n::error {}'.format(details)
     else:
-        if longrepr is None:
-            return '\n::error file={},line={}'.format(filesystempath, lineno)
-        else:
-            longrepr = _escape(longrepr)
-            return '\n::error file={},line={}::{}'.format(filesystempath, lineno, longrepr)
+        longrepr = _escape(longrepr)
+        return '\n::error {}::{}'.format(details, longrepr)
 
 def _escape(s):
     return s.replace('%', '%25').replace('\r', '%0D').replace('\n', '%0A')
