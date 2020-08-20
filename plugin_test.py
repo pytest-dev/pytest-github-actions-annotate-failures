@@ -86,6 +86,7 @@ def test_annotation_fail_cwd(testdir):
         '''
     )
     testdir.monkeypatch.setenv('GITHUB_ACTIONS', 'true')
+    testdir.monkeypatch.setenv('GITHUB_WORKSPACE', os.path.dirname(str(testdir.tmpdir)))
     testdir.mkdir('foo')
     testdir.makefile('.ini', pytest='[pytest]\ntestpaths=..')
     result = testdir.runpytest_subprocess('--rootdir=foo')
