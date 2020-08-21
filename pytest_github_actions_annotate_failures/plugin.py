@@ -3,6 +3,14 @@ import os
 import pytest
 from collections import OrderedDict
 
+# Reference:
+# https://docs.pytest.org/en/latest/writing_plugins.html#hookwrapper-executing-around-other-hooks
+# https://docs.pytest.org/en/latest/writing_plugins.html#hook-function-ordering-call-example
+# https://docs.pytest.org/en/stable/reference.html#pytest.hookspec.pytest_runtest_makereport
+#
+# Inspired by:
+# https://github.com/pytest-dev/pytest/blob/master/src/_pytest/terminal.py
+
 @pytest.hookimpl(tryfirst=True, hookwrapper=True)
 def pytest_runtest_makereport(item, call):
     # execute all other hooks to obtain the report object

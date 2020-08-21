@@ -119,7 +119,7 @@ def test_annotation_long(testdir):
     testdir.monkeypatch.setenv('GITHUB_ACTIONS', 'true')
     result = testdir.runpytest_subprocess()
     result.stdout.fnmatch_lines([
-        '::error file=test_annotation_long.py,line=17::test_annotation_fail*assert 8 == 3*where 8 = f(8)*',
+        '::error file=test_annotation_long.py,line=17::test_fail*assert 8 == 3*where 8 = f(8)*',
     ])
     no_fnmatch_line(result, '::*assert x += 1*')
 
@@ -145,7 +145,7 @@ def test_class_method(testdir):
 
 
 
-def test_annotation_long(testdir):
+def test_annotation_param(testdir):
     testdir.makepyfile(
         '''
         import pytest
@@ -164,7 +164,7 @@ def test_annotation_long(testdir):
     testdir.monkeypatch.setenv('GITHUB_ACTIONS', 'true')
     result = testdir.runpytest_subprocess()
     result.stdout.fnmatch_lines([
-        '::error file=test_annotation_long.py,line=11::test_param?other?1*assert 2 == 3*',
+        '::error file=test_annotation_param.py,line=11::test_param?other?1*assert 2 == 3*',
     ])
 
 # Debugging / development tip:
