@@ -1,7 +1,10 @@
+# -*- coding: utf-8 -*-
 from __future__ import print_function
+
 import os
-import pytest
 from collections import OrderedDict
+
+import pytest
 
 # Reference:
 # https://docs.pytest.org/en/latest/writing_plugins.html#hookwrapper-executing-around-other-hooks
@@ -11,6 +14,7 @@ from collections import OrderedDict
 # Inspired by:
 # https://github.com/pytest-dev/pytest/blob/master/src/_pytest/terminal.py
 
+
 @pytest.hookimpl(tryfirst=True, hookwrapper=True)
 def pytest_runtest_makereport(item, call):
     # execute all other hooks to obtain the report object
@@ -19,7 +23,7 @@ def pytest_runtest_makereport(item, call):
 
     # enable only in a workflow of GitHub Actions
     # ref: https://help.github.com/en/actions/configuring-and-managing-workflows/using-environment-variables#default-environment-variables
-    if os.environ.get('GITHUB_ACTIONS') != 'true':
+    if os.environ.get("GITHUB_ACTIONS") != "true":
         return
 
     if report.when == "call" and report.failed:
@@ -27,16 +31,15 @@ def pytest_runtest_makereport(item, call):
         filesystempath, lineno, _ = report.location
 
         # try to convert to absolute path in GitHub Actions
-        workspace = os.environ.get('GITHUB_WORKSPACE')
+        workspace = os.environ.get("GITHUB_WORKSPACE")
         if workspace:
             full_path = os.path.abspath(filesystempath)
             rel_path = os.path.relpath(full_path, workspace)
-            if not rel_path.startswith('..'):
+            if not rel_path.startswith(".."):
                 filesystempath = rel_path
 
         # 0-index to 1-index
         lineno += 1
-
 
         # get the name of the current failed test, with parametrize info
         longrepr = report.head_line or item.name
@@ -59,13 +62,14 @@ def _error_workflow_command(filesystempath, lineno, longrepr):
     if lineno is not None:
         details_dict["line"] = lineno
 
-    details = ",".join("{}={}".format(k,v) for k,v in details_dict.items())
+    details = ",".join("{}={}".format(k, v) for k, v in details_dict.items())
 
     if longrepr is None:
-        return '\n::error {}'.format(details)
+        return "\n::error {}".format(details)
     else:
         longrepr = _escape(longrepr)
-        return '\n::error {}::{}'.format(details, longrepr)
+        return "\n::error {}::{}".format(details, longrepr)
+
 
 def _escape(s):
-    return s.replace('%', '%25').replace('\r', '%0D').replace('\n', '%0A')
+    return s.replace("%", "%25").replace("\r", "%0D").replace("\n", "%0A")
