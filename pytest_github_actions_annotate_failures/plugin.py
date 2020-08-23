@@ -1,46 +1,75 @@
+# -*- coding: utf-8 -*-
 from __future__ import print_function
-import os
 
-def pytest_runtest_logreport(report):
+import os
+from collections import OrderedDict
+
+import pytest
+
+# Reference:
+# https://docs.pytest.org/en/latest/writing_plugins.html#hookwrapper-executing-around-other-hooks
+# https://docs.pytest.org/en/latest/writing_plugins.html#hook-function-ordering-call-example
+# https://docs.pytest.org/en/stable/reference.html#pytest.hookspec.pytest_runtest_makereport
+#
+# Inspired by:
+# https://github.com/pytest-dev/pytest/blob/master/src/_pytest/terminal.py
+
+
+@pytest.hookimpl(tryfirst=True, hookwrapper=True)
+def pytest_runtest_makereport(item, call):
+    # execute all other hooks to obtain the report object
+    outcome = yield
+    report = outcome.get_result()
+
     # enable only in a workflow of GitHub Actions
     # ref: https://help.github.com/en/actions/configuring-and-managing-workflows/using-environment-variables#default-environment-variables
-    if os.environ.get('GITHUB_ACTIONS') != 'true':
+    if os.environ.get("GITHUB_ACTIONS") != "true":
         return
 
-    if report.outcome != 'failed':
-        return
+    if report.when == "call" and report.failed:
+        # collect information to be annotated
+        filesystempath, lineno, _ = report.location
 
-    # collect information to be annotated
-    filesystempath, lineno, _ = report.location
+        # try to convert to absolute path in GitHub Actions
+        workspace = os.environ.get("GITHUB_WORKSPACE")
+        if workspace:
+            full_path = os.path.abspath(filesystempath)
+            rel_path = os.path.relpath(full_path, workspace)
+            if not rel_path.startswith(".."):
+                filesystempath = rel_path
 
-    # try to convert to absolute path in GitHub Actions
-    workspace = os.environ.get('GITHUB_WORKSPACE')
-    if workspace:
-        full_path = os.path.abspath(filesystempath)
-        rel_path = os.path.relpath(full_path, workspace)
-        if not rel_path.startswith('..'):
-            filesystempath = rel_path
+        # 0-index to 1-index
+        lineno += 1
 
-    # 0-index to 1-index
-    lineno += 1
+        # get the name of the current failed test, with parametrize info
+        longrepr = report.head_line or item.name
 
-    longrepr = str(report.longrepr)
+        # get the error message and line number from the actual error
+        try:
+            longrepr += "\n\n" + report.longrepr.reprcrash.message
+            lineno = report.longrepr.reprcrash.lineno
 
-    print(_error_workflow_command(filesystempath, lineno, longrepr))
+        except AttributeError:
+            pass
+
+        print(_error_workflow_command(filesystempath, lineno, longrepr))
+
 
 def _error_workflow_command(filesystempath, lineno, longrepr):
-    if lineno is None:
-        if longrepr is None:
-            return '\n::error file={}'.format(filesystempath)
-        else:
-            longrepr = _escape(longrepr)
-            return '\n::error file={}::{}'.format(filesystempath, longrepr)
+    # Build collection of arguments. Ordering is strict for easy testing
+    details_dict = OrderedDict()
+    details_dict["file"] = filesystempath
+    if lineno is not None:
+        details_dict["line"] = lineno
+
+    details = ",".join("{}={}".format(k, v) for k, v in details_dict.items())
+
+    if longrepr is None:
+        return "\n::error {}".format(details)
     else:
-        if longrepr is None:
-            return '\n::error file={},line={}'.format(filesystempath, lineno)
-        else:
-            longrepr = _escape(longrepr)
-            return '\n::error file={},line={}::{}'.format(filesystempath, lineno, longrepr)
+        longrepr = _escape(longrepr)
+        return "\n::error {}::{}".format(details, longrepr)
+
 
 def _escape(s):
-    return s.replace('%', '%25').replace('\r', '%0D').replace('\n', '%0A')
+    return s.replace("%", "%25").replace("\r", "%0D").replace("\n", "%0A")
