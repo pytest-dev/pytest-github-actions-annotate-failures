@@ -9,13 +9,13 @@ import pytest
 pytest_plugins = "pytester"
 
 
-# result.stdout.no_fnmatch_line() is added to testdir on pytest 5.3.0
+# result.stderr.no_fnmatch_line() is added to testdir on pytest 5.3.0
 # https://docs.pytest.org/en/stable/changelog.html#pytest-5-3-0-2019-11-19
 def no_fnmatch_line(result, pattern):
     if version.parse(pytest.__version__) >= version.parse("5.3.0"):
-        result.stdout.no_fnmatch_line(pattern + "*",)
+        result.stderr.no_fnmatch_line(pattern + "*",)
     else:
-        assert pattern not in result.stdout.str()
+        assert pattern not in result.stderr.str()
 
 
 def test_annotation_succeed_no_output(testdir):
@@ -46,7 +46,7 @@ def test_annotation_fail(testdir):
     )
     testdir.monkeypatch.setenv("GITHUB_ACTIONS", "true")
     result = testdir.runpytest_subprocess()
-    result.stdout.fnmatch_lines(
+    result.stderr.fnmatch_lines(
         ["::error file=test_annotation_fail.py,line=5::test_fail*assert 0*",]
     )
 
@@ -64,7 +64,7 @@ def test_annotation_exception(testdir):
     )
     testdir.monkeypatch.setenv("GITHUB_ACTIONS", "true")
     result = testdir.runpytest_subprocess()
-    result.stdout.fnmatch_lines(
+    result.stderr.fnmatch_lines(
         ["::error file=test_annotation_exception.py,line=5::test_fail*oops*",]
     )
 
@@ -101,7 +101,7 @@ def test_annotation_fail_cwd(testdir):
     testdir.mkdir("foo")
     testdir.makefile(".ini", pytest="[pytest]\ntestpaths=..")
     result = testdir.runpytest_subprocess("--rootdir=foo")
-    result.stdout.fnmatch_lines(
+    result.stderr.fnmatch_lines(
         ["::error file=test_annotation_fail_cwd.py,line=5::test_fail*assert 0*",]
     )
 
@@ -130,7 +130,7 @@ def test_annotation_long(testdir):
     )
     testdir.monkeypatch.setenv("GITHUB_ACTIONS", "true")
     result = testdir.runpytest_subprocess()
-    result.stdout.fnmatch_lines(
+    result.stderr.fnmatch_lines(
         [
             "::error file=test_annotation_long.py,line=17::test_fail*assert 8 == 3*where 8 = f(8)*",
         ]
@@ -152,7 +152,7 @@ def test_class_method(testdir):
     )
     testdir.monkeypatch.setenv("GITHUB_ACTIONS", "true")
     result = testdir.runpytest_subprocess()
-    result.stdout.fnmatch_lines(
+    result.stderr.fnmatch_lines(
         [
             "::error file=test_class_method.py,line=7::TestClass.test_method*assert 1 == 2*",
         ]
@@ -178,7 +178,7 @@ def test_annotation_param(testdir):
     )
     testdir.monkeypatch.setenv("GITHUB_ACTIONS", "true")
     result = testdir.runpytest_subprocess()
-    result.stdout.fnmatch_lines(
+    result.stderr.fnmatch_lines(
         [
             "::error file=test_annotation_param.py,line=11::test_param?other?1*assert 2 == 3*",
         ]

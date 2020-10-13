@@ -2,6 +2,7 @@
 from __future__ import print_function
 
 import os
+import sys
 from collections import OrderedDict
 
 import pytest
@@ -52,7 +53,9 @@ def pytest_runtest_makereport(item, call):
         except AttributeError:
             pass
 
-        print(_error_workflow_command(filesystempath, lineno, longrepr))
+        print(
+            _error_workflow_command(filesystempath, lineno, longrepr), file=sys.stderr
+        )
 
 
 def _error_workflow_command(filesystempath, lineno, longrepr):
