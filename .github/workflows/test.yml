@@ -9,19 +9,24 @@ on:
 
 jobs:
   test:
-    runs-on: ubuntu-latest
-
     strategy:
       matrix:
+        os: [ubuntu-latest, windows-latest]
         python-version: [2.7, 3.5, 3.6, 3.7, 3.8]
         pytest-version: [4.6.11, 5.4.3]
 
         exclude:
           # pytest 5.x.x doesn't support Python 2.7
-          - python-version: 2.7
+          - os: ubuntu-latest
+            python-version: 2.7
+            pytest-version: 5.4.3
+          - os: windows-latest
+            python-version: 2.7
             pytest-version: 5.4.3
 
-    name: Python ${{ matrix.python-version }}, pytest ${{ matrix.pytest-version }}
+    runs-on: ${{ matrix.os }}
+
+    name: ${{ matrix.os }}, Python ${{ matrix.python-version }}, pytest ${{ matrix.pytest-version }}
     steps:
     - uses: actions/checkout@v2
 
