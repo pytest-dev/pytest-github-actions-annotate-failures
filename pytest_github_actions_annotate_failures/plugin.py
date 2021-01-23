@@ -35,7 +35,13 @@ def pytest_runtest_makereport(item, call):
         workspace = os.environ.get("GITHUB_WORKSPACE")
         if workspace:
             full_path = os.path.abspath(filesystempath)
-            rel_path = os.path.relpath(full_path, workspace)
+            try:
+                rel_path = os.path.relpath(full_path, workspace)
+            except ValueError:
+                # os.path.relpath() will raise ValueError on Windows
+                # when full_path and workspace have different mount points.
+                # https://github.com/utgwkk/pytest-github-actions-annotate-failures/issues/20
+                rel_path = filesystempath
             if not rel_path.startswith(".."):
                 filesystempath = rel_path
 
