@@ -106,6 +106,24 @@ def test_annotation_fail_cwd(testdir):
     )
 
 
+def test_annotation_fail_runpath(testdir):
+    testdir.makepyfile(
+        """
+        import pytest
+        pytest_plugins = 'pytest_github_actions_annotate_failures'
+
+        def test_fail():
+            assert 0
+        """
+    )
+    testdir.monkeypatch.setenv("GITHUB_ACTIONS", "true")
+    testdir.monkeypatch.setenv("PYTEST_RUN_PATH", "some_path")
+    result = testdir.runpytest_subprocess()
+    result.stderr.fnmatch_lines(
+        ["::error file=some_path/test_annotation_fail_runpath.py,line=5::test_fail*assert 0*",]
+    )
+
+
 def test_annotation_long(testdir):
     testdir.makepyfile(
         """
