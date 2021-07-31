@@ -24,13 +24,19 @@ jobs:
           - 6.2.4
 
         exclude:
-          # pytest 5.x.x doesn't support Python 2.7
+          # pytest >= 5.x.x doesn't support Python 2.7
           - os: ubuntu-latest
+            python-version: 2.7
+            pytest-version: 5.4.3
+          - os: ubuntu-latest
+            python-version: 2.7
+            pytest-version: 6.2.4
+          - os: windows-latest
             python-version: 2.7
             pytest-version: 5.4.3
           - os: windows-latest
             python-version: 2.7
-            pytest-version: 5.4.3
+            pytest-version: 6.2.4
 
     runs-on: ${{ matrix.os }}
 
