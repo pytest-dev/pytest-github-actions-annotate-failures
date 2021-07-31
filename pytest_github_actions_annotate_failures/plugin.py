@@ -31,6 +31,10 @@ def pytest_runtest_makereport(item, call):
         # collect information to be annotated
         filesystempath, lineno, _ = report.location
 
+        runpath = os.environ.get("PYTEST_RUN_PATH")
+        if runpath:
+            filesystempath = os.path.join(runpath, filesystempath)
+
         # try to convert to absolute path in GitHub Actions
         workspace = os.environ.get("GITHUB_WORKSPACE")
         if workspace:
