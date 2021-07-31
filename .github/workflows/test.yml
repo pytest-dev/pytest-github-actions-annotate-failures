@@ -18,7 +18,10 @@ jobs:
           - '3.7'
           - '3.8'
           - '3.9'
-        pytest-version: [4.6.11, 5.4.3]
+        pytest-version:
+          - 4.6.11
+          - 5.4.3
+          - 6.2.4
 
         exclude:
           # pytest 5.x.x doesn't support Python 2.7
