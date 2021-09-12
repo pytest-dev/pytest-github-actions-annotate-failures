@@ -18,7 +18,24 @@ jobs:
           - '3.7'
           - '3.8'
           - '3.9'
-        # TODO: test with specific major version of pytest
+        pytest-version:
+          - 4
+          - 5
+          - 6
+        exclude:
+          # pytest >= 5.x.x doesn't support Python 2.7
+          - os: ubuntu-latest
+            python-version: 2.7
+            pytest-version: 5
+          - os: ubuntu-latest
+            python-version: 2.7
+            pytest-version: 6
+          - os: windows-latest
+            python-version: 2.7
+            pytest-version: 5
+          - os: windows-latest
+            python-version: 2.7
+            pytest-version: 6
 
     runs-on: ${{ matrix.os }}
 
@@ -41,6 +58,7 @@ jobs:
       run: tox
       env:
         PLATFORM: ${{ matrix.os }}
+        PYTEST_MAJOR_VERSION: ${{ matrix.pytest-version }}
         PYTEST_PLUGINS: pytest_github_actions_annotate_failures
 
   post-test:
