@@ -37,9 +37,6 @@ jobs:
         pip install -r requirements.txt
         pip install tox tox-gh-actions
 
-    - name: Install itself
-      run: python setup.py install
-
     - name: Run test
       run: tox
       env:
