@@ -40,6 +40,7 @@ jobs:
     - name: Run test
       run: tox
       env:
+        PLATFORM: ${{ matrix.os }}
         PYTEST_PLUGINS: pytest_github_actions_annotate_failures
 
   post-test:
