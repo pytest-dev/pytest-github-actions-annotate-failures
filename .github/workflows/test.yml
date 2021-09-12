@@ -39,7 +39,7 @@ jobs:
 
     runs-on: ${{ matrix.os }}
 
-    name: ${{ matrix.os }}, Python ${{ matrix.python-version }}
+    name: ${{ matrix.os }}, Python ${{ matrix.python-version }}, pytest ${{ matrix.pytest-version }}
     steps:
     - uses: actions/checkout@v2
 
