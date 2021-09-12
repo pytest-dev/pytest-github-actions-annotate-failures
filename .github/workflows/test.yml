@@ -19,24 +19,23 @@ jobs:
           - '3.8'
           - '3.9'
         pytest-version:
-          - 4.6.11
-          - 5.4.3
-          - 6.2.4
-
+          - 4
+          - 5
+          - 6
         exclude:
           # pytest >= 5.x.x doesn't support Python 2.7
           - os: ubuntu-latest
             python-version: 2.7
-            pytest-version: 5.4.3
+            pytest-version: 5
           - os: ubuntu-latest
             python-version: 2.7
-            pytest-version: 6.2.4
+            pytest-version: 6
           - os: windows-latest
             python-version: 2.7
-            pytest-version: 5.4.3
+            pytest-version: 5
           - os: windows-latest
             python-version: 2.7
-            pytest-version: 6.2.4
+            pytest-version: 6
 
     runs-on: ${{ matrix.os }}
 
@@ -49,17 +48,16 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
 
-    - name: Install dependencies
+    - name: Install test dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install -r requirements.txt
-        pip install pytest==${{ matrix.pytest-version }}
+        pip install tox tox-gh-actions
 
-    - name: Install itself
-      run: python setup.py install
-
-    - run: pytest
+    - name: Run test
+      run: tox
       env:
+        PLATFORM: ${{ matrix.os }}
+        PYTEST_MAJOR_VERSION: ${{ matrix.pytest-version }}
         PYTEST_PLUGINS: pytest_github_actions_annotate_failures
 
   post-test:
