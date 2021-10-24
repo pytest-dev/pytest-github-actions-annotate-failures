@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.4 (2021-10-24)
+
+- Ignore failures that are retried using [`pytest-rerunfailures`](https://pypi.org/project/pytest-rerunfailures/) plugin #40 (thanks to @billyvg)
+
 ## 0.1.3 (2021-07-31)
 
 - Allow specifying a run path with `PYTEST_RUN_PATH` environment variable #29 (thanks to @michamos)
