@@ -27,15 +27,6 @@ def pytest_runtest_makereport(item, call):
     if os.environ.get("GITHUB_ACTIONS") != "true":
         return
 
-    try:
-        # If we have the pytest_rerunfailures plugin, and there are still
-        # retries to be run, then ignore error
-        import pytest_rerunfailures
-        if item.execution_count <= pytest_rerunfailures.get_reruns_count(item):
-            return
-    except ImportError:
-        pass
-
     if report.when == "call" and report.failed:
         # collect information to be annotated
         filesystempath, lineno, _ = report.location
