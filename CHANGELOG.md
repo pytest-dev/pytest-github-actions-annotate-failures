@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.5 (2021-10-24)
+
+- Revert changes of version 0.1.4 #42
+
 ## 0.1.4 (2021-10-24)
 
 - Ignore failures that are retried using [`pytest-rerunfailures`](https://pypi.org/project/pytest-rerunfailures/) plugin #40 (thanks to @billyvg)
