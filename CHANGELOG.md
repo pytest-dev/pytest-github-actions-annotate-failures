@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.6 (2021-12-8)
+
+- Handle test failures without a line number #47 (thanks to @Tenzer)
+
 ## 0.1.5 (2021-10-24)
 
 - Revert changes of version 0.1.4 #42
