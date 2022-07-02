@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.7 (2022-07-02)
+
+- add longrepr from plugin tests #50 (thanks to @helpmefindaname)
+- Use latest major version for actions #51
+
 ## 0.1.6 (2021-12-8)
 
 - Handle test failures without a line number #47 (thanks to @Tenzer)
