@@ -19,28 +19,10 @@ jobs:
           - '3.8'
           - '3.9'
           - '3.10'
-        pytest-version:
-          - 4
-          - 5
-          - 6
-        exclude:
-          # pytest >= 5.x.x doesn't support Python 2.7
-          - os: ubuntu-latest
-            python-version: 2.7
-            pytest-version: 5
-          - os: ubuntu-latest
-            python-version: 2.7
-            pytest-version: 6
-          - os: windows-latest
-            python-version: 2.7
-            pytest-version: 5
-          - os: windows-latest
-            python-version: 2.7
-            pytest-version: 6
 
     runs-on: ${{ matrix.os }}
 
-    name: ${{ matrix.os }}, Python ${{ matrix.python-version }}, pytest ${{ matrix.pytest-version }}
+    name: ${{ matrix.os }}, Python ${{ matrix.python-version }}
     steps:
     - uses: actions/checkout@v3
 
@@ -54,11 +36,36 @@ jobs:
         python -m pip install --upgrade pip
         pip install tox tox-gh-actions
 
-    - name: Run test
+    - name: Run tests with PyTest 4
       run: tox
+      if: ${{ matrix.python-version != '3.10' }}
       env:
         PLATFORM: ${{ matrix.os }}
-        PYTEST_MAJOR_VERSION: ${{ matrix.pytest-version }}
+        PYTEST_MAJOR_VERSION: 4
+        PYTEST_PLUGINS: pytest_github_actions_annotate_failures
+
+    - name: Run tests with PyTest 5
+      run: tox
+      if: ${{ matrix.python-version != '2.7' && matrix.python-version != '3.10' }}
+      env:
+        PLATFORM: ${{ matrix.os }}
+        PYTEST_MAJOR_VERSION: 5
+        PYTEST_PLUGINS: pytest_github_actions_annotate_failures
+
+    - name: Run tests with PyTest 6
+      run: tox
+      if: ${{ matrix.python-version != '2.7' }}
+      env:
+        PLATFORM: ${{ matrix.os }}
+        PYTEST_MAJOR_VERSION: 6
+        PYTEST_PLUGINS: pytest_github_actions_annotate_failures
+
+    - name: Run tests with PyTest 7
+      run: tox
+      if: ${{ matrix.python-version != '2.7' }}
+      env:
+        PLATFORM: ${{ matrix.os }}
+        PYTEST_MAJOR_VERSION: 7
         PYTEST_PLUGINS: pytest_github_actions_annotate_failures
 
   post-test:
