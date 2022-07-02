@@ -57,12 +57,14 @@ def pytest_runtest_makereport(item, call):
         longrepr = report.head_line or item.name
 
         # get the error message and line number from the actual error
-        try:
+        if hasattr(report.longrepr, "reprcrash"):
             longrepr += "\n\n" + report.longrepr.reprcrash.message
             lineno = report.longrepr.reprcrash.lineno
-
-        except AttributeError:
-            pass
+        elif isinstance(report.longrepr, tuple):
+            _, lineno, message = report.longrepr
+            longrepr += "\n\n" + message
+        elif isinstance(report.longrepr, str):
+            longrepr += "\n\n" + report.longrepr
 
         print(
             _error_workflow_command(filesystempath, lineno, longrepr), file=sys.stderr
