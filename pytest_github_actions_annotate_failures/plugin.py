@@ -59,7 +59,12 @@ def pytest_runtest_makereport(item, call):
         # get the error message and line number from the actual error
         if hasattr(report.longrepr, "reprcrash"):
             longrepr += "\n\n" + report.longrepr.reprcrash.message
-            lineno = report.longrepr.reprcrash.lineno
+            traceback_entries = report.longrepr.reprtraceback.reprentries
+            if len(traceback_entries) > 1:
+                # Handle third-party exceptions
+                lineno = traceback_entries[0].reprfileloc.lineno
+            else:
+                lineno = report.longrepr.reprcrash.lineno
         elif isinstance(report.longrepr, tuple):
             _, lineno, message = report.longrepr
             longrepr += "\n\n" + message

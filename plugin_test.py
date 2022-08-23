@@ -69,6 +69,31 @@ def test_annotation_exception(testdir):
     )
 
 
+def test_annotation_third_party_exception(testdir):
+    testdir.makepyfile(
+        my_module="""
+        def fn():
+            raise Exception('oops')
+        """
+    )
+
+    testdir.makepyfile(
+        f"""
+        import pytest
+        from my_module import fn
+        pytest_plugins = 'pytest_github_actions_annotate_failures'
+
+        def test_fail():
+            fn()
+        """
+    )
+    testdir.monkeypatch.setenv("GITHUB_ACTIONS", "true")
+    result = testdir.runpytest_subprocess()
+    result.stderr.fnmatch_lines(
+        ["::error file=test_annotation_third_party_exception.py,line=6::test_fail*oops*",]
+    )
+
+
 def test_annotation_fail_disabled_outside_workflow(testdir):
     testdir.makepyfile(
         """
