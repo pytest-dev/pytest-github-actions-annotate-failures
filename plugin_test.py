@@ -78,7 +78,7 @@ def test_annotation_third_party_exception(testdir):
     )
 
     testdir.makepyfile(
-        f"""
+        """
         import pytest
         from my_module import fn
         pytest_plugins = 'pytest_github_actions_annotate_failures'
