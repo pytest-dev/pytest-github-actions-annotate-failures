@@ -5,19 +5,17 @@ import os
 import pytest
 from packaging import version
 
+PYTEST_VERSION = version.parse(pytest.__version__)
 pytest_plugins = "pytester"
 
 
-# result.stderr.no_fnmatch_line() is added to testdir on pytest 5.3.0
+# result.stderr.no_fnmatch_line() was added to testdir on pytest 5.3.0
 # https://docs.pytest.org/en/stable/changelog.html#pytest-5-3-0-2019-11-19
-def no_fnmatch_line(result, pattern):
-    if version.parse(pytest.__version__) >= version.parse("5.3.0"):
-        result.stderr.no_fnmatch_line(pattern + "*",)
-    else:
-        assert pattern not in result.stderr.str()
+def no_fnmatch_line(result: pytest.RunResult, pattern: str):
+    result.stderr.no_fnmatch_line(pattern + "*")
 
 
-def test_annotation_succeed_no_output(testdir):
+def test_annotation_succeed_no_output(testdir: pytest.Testdir):
     testdir.makepyfile(
         """
         import pytest
@@ -33,7 +31,7 @@ def test_annotation_succeed_no_output(testdir):
     no_fnmatch_line(result, "::error file=test_annotation_succeed_no_output.py")
 
 
-def test_annotation_pytest_error(testdir):
+def test_annotation_pytest_error(testdir: pytest.Testdir):
     testdir.makepyfile(
         """
         import pytest
@@ -55,7 +53,7 @@ def test_annotation_pytest_error(testdir):
     )
 
 
-def test_annotation_fail(testdir):
+def test_annotation_fail(testdir: pytest.Testdir):
     testdir.makepyfile(
         """
         import pytest
@@ -68,11 +66,13 @@ def test_annotation_fail(testdir):
     testdir.monkeypatch.setenv("GITHUB_ACTIONS", "true")
     result = testdir.runpytest_subprocess()
     result.stderr.fnmatch_lines(
-        ["::error file=test_annotation_fail.py,line=5::test_fail*assert 0*",]
+        [
+            "::error file=test_annotation_fail.py,line=5::test_fail*assert 0*",
+        ]
     )
 
 
-def test_annotation_exception(testdir):
+def test_annotation_exception(testdir: pytest.Testdir):
     testdir.makepyfile(
         """
         import pytest
@@ -86,11 +86,51 @@ def test_annotation_exception(testdir):
     testdir.monkeypatch.setenv("GITHUB_ACTIONS", "true")
     result = testdir.runpytest_subprocess()
     result.stderr.fnmatch_lines(
-        ["::error file=test_annotation_exception.py,line=5::test_fail*oops*",]
+        [
+            "::error file=test_annotation_exception.py,line=5::test_fail*oops*",
+        ]
     )
 
 
-def test_annotation_third_party_exception(testdir):
+def test_annotation_warning(testdir: pytest.Testdir):
+    testdir.makepyfile(
+        """
+        import warnings
+        import pytest
+        pytest_plugins = 'pytest_github_actions_annotate_failures'
+
+        def test_warning():
+            warnings.warn('beware', Warning)
+            assert 1
+        """
+    )
+    testdir.monkeypatch.setenv("GITHUB_ACTIONS", "true")
+    result = testdir.runpytest_subprocess()
+    result.stderr.fnmatch_lines(
+        [
+            "::warning file=test_annotation_warning.py,line=6::beware",
+        ]
+    )
+
+
+def test_annotation_exclude_warnings(testdir: pytest.Testdir):
+    testdir.makepyfile(
+        """
+        import warnings
+        import pytest
+        pytest_plugins = 'pytest_github_actions_annotate_failures'
+
+        def test_warning():
+            warnings.warn('beware', Warning)
+            assert 1
+        """
+    )
+    testdir.monkeypatch.setenv("GITHUB_ACTIONS", "true")
+    result = testdir.runpytest_subprocess("--exclude-warnings")
+    assert not result.stderr.lines
+
+
+def test_annotation_third_party_exception(testdir: pytest.Testdir):
     testdir.makepyfile(
         my_module="""
         def fn():
@@ -111,11 +151,43 @@ def test_annotation_third_party_exception(testdir):
     testdir.monkeypatch.setenv("GITHUB_ACTIONS", "true")
     result = testdir.runpytest_subprocess()
     result.stderr.fnmatch_lines(
-        ["::error file=test_annotation_third_party_exception.py,line=6::test_fail*oops*",]
+        [
+            "::error file=test_annotation_third_party_exception.py,line=6::test_fail*oops*",
+        ]
     )
 
 
-def test_annotation_fail_disabled_outside_workflow(testdir):
+def test_annotation_third_party_warning(testdir: pytest.Testdir):
+    testdir.makepyfile(
+        my_module="""
+        import warnings
+
+        def fn():
+            warnings.warn('beware', Warning)
+        """
+    )
+
+    testdir.makepyfile(
+        """
+        import pytest
+        from my_module import fn
+        pytest_plugins = 'pytest_github_actions_annotate_failures'
+
+        def test_warning():
+            fn()
+        """
+    )
+    testdir.monkeypatch.setenv("GITHUB_ACTIONS", "true")
+    result = testdir.runpytest_subprocess()
+    result.stderr.fnmatch_lines(
+        # ["::warning file=test_annotation_third_party_warning.py,line=6::beware",]
+        [
+            "::warning file=my_module.py,line=4::beware",
+        ]
+    )
+
+
+def test_annotation_fail_disabled_outside_workflow(testdir: pytest.Testdir):
     testdir.makepyfile(
         """
         import pytest
@@ -132,7 +204,7 @@ def test_annotation_fail_disabled_outside_workflow(testdir):
     )
 
 
-def test_annotation_fail_cwd(testdir):
+def test_annotation_fail_cwd(testdir: pytest.Testdir):
     testdir.makepyfile(
         """
         import pytest
@@ -148,11 +220,13 @@ def test_annotation_fail_cwd(testdir):
     testdir.makefile(".ini", pytest="[pytest]\ntestpaths=..")
     result = testdir.runpytest_subprocess("--rootdir=foo")
     result.stderr.fnmatch_lines(
-        ["::error file=test_annotation_fail_cwd.py,line=5::test_fail*assert 0*",]
+        [
+            "::error file=test_annotation_fail_cwd.py,line=5::test_fail*assert 0*",
+        ]
     )
 
 
-def test_annotation_fail_runpath(testdir):
+def test_annotation_fail_runpath(testdir: pytest.Testdir):
     testdir.makepyfile(
         """
         import pytest
@@ -166,11 +240,13 @@ def test_annotation_fail_runpath(testdir):
     testdir.monkeypatch.setenv("PYTEST_RUN_PATH", "some_path")
     result = testdir.runpytest_subprocess()
     result.stderr.fnmatch_lines(
-        ["::error file=some_path/test_annotation_fail_runpath.py,line=5::test_fail*assert 0*",]
+        [
+            "::error file=some_path/test_annotation_fail_runpath.py,line=5::test_fail*assert 0*",
+        ]
     )
 
 
-def test_annotation_long(testdir):
+def test_annotation_long(testdir: pytest.Testdir):
     testdir.makepyfile(
         """
         import pytest
@@ -202,7 +278,7 @@ def test_annotation_long(testdir):
     no_fnmatch_line(result, "::*assert x += 1*")
 
 
-def test_class_method(testdir):
+def test_class_method(testdir: pytest.Testdir):
     testdir.makepyfile(
         """
         import pytest
@@ -224,7 +300,7 @@ def test_class_method(testdir):
     no_fnmatch_line(result, "::*x = 1*")
 
 
-def test_annotation_param(testdir):
+def test_annotation_param(testdir: pytest.Testdir):
     testdir.makepyfile(
         """
         import pytest
