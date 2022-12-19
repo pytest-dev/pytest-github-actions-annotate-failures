@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.8 (2022-12-20)
+
+No functionality change.
+- Change URL of PyPI project link #61
+- Fix CI environment #62 (thanks to @henryiii, @nicoddemus)
+
 ## 0.1.7 (2022-07-02)
 
 - add longrepr from plugin tests #50 (thanks to @helpmefindaname)
