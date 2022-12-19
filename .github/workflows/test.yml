@@ -14,11 +14,16 @@ jobs:
         os: [ubuntu-latest, windows-latest]
         python-version:
           - '2.7'
-          - '3.6'
           - '3.7'
           - '3.8'
           - '3.9'
           - '3.10'
+        include:
+          # Python 3.6 is not supported in Ubuntu 22.04, so manually adding it to matrix with older version of Ubuntu
+          - os: ubuntu-20.04
+            python-version: '3.6'
+          - os: windows-latest
+            python-version: '3.6'
 
     runs-on: ${{ matrix.os }}
 
