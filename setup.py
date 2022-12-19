@@ -13,7 +13,7 @@ setup(
     long_description_content_type="text/markdown",
     author="utgwkk",
     author_email="utagawakiki@gmail.com",
-    url="https://github.com/utgwkk/pytest-github-actions-annotate-failures",
+    url="https://github.com/pytest-dev/pytest-github-actions-annotate-failures",
     license="MIT",
     classifiers=["Framework :: Pytest",],
     python_requires=">=2.7,!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*,!=3.5.*",
