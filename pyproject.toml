@@ -1,0 +1,51 @@
+[build-system]
+requires = [
+  "setuptools >= 64.0.0", # required by pyproject+setuptools_scm integration
+  "setuptools_scm[toml] >= 7.0.5", # required for "no-local-version" scheme
+
+]
+build-backend = "setuptools.build_meta"
+
+[project]
+# https://peps.python.org/pep-0621/#readme
+requires-python = ">=3.7"
+version = "0.1.8"
+name = "pytest-github-actions-annotate-failures"
+description = "pytest plugin to annotate failed tests with a workflow command for GitHub Actions"
+readme = "README.md"
+authors = [{ "name" = "utgwkk", "email" = "utagawakiki@gmail.com" }]
+maintainers = [{ "name" = "utgwkk", "email" = "utagawakiki@gmail.com" }]
+license = { text = "MIT" }
+classifiers = [
+  "Development Status :: 5 - Production/Stable",
+  "Environment :: Console",
+  "Intended Audience :: Developers",
+  "Intended Audience :: Information Technology",
+  "Intended Audience :: System Administrators",
+  "License :: OSI Approved :: MIT License",
+  "Framework :: Pytest",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.7",
+  "Programming Language :: Python :: 3.8",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python",
+  "Topic :: System :: Systems Administration",
+  "Topic :: Software Development :: Quality Assurance",
+  "Topic :: Software Development :: Testing",
+  "Topic :: Utilities",
+]
+keywords = ["ansible", "testing", "molecule", "plugin"]
+dependencies = [
+    "pytest>=4.0.0"
+]
+
+[project.urls]
+homepage = "https://github.com/pytest-dev/pytest-github-actions-annotate-failures"
+repository = "https://github.com/pytest-dev/pytest-github-actions-annotate-failures"
+changelog = "https://github.com/pytest-dev/pytest-github-actions-annotate-failures/releases"
+
+[project.entry-points.pytest11]
+pytest_github_actions_annotate_failures = "pytest_github_actions_annotate_failures.plugin"
