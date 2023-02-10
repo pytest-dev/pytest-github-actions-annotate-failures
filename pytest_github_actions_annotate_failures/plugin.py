@@ -5,6 +5,9 @@ import os
 import sys
 from collections import OrderedDict
 
+from _pytest._code.code import ExceptionRepr
+from _pytest.reports import CollectReport
+
 import pytest
 
 # Reference:
@@ -20,7 +23,7 @@ import pytest
 def pytest_runtest_makereport(item, call):
     # execute all other hooks to obtain the report object
     outcome = yield
-    report = outcome.get_result()
+    report: CollectReport = outcome.get_result()
 
     # enable only in a workflow of GitHub Actions
     # ref: https://help.github.com/en/actions/configuring-and-managing-workflows/using-environment-variables#default-environment-variables
@@ -57,12 +60,12 @@ def pytest_runtest_makereport(item, call):
         longrepr = report.head_line or item.name
 
         # get the error message and line number from the actual error
-        if hasattr(report.longrepr, "reprcrash"):
+        if isinstance(report.longrepr, ExceptionRepr):
             longrepr += "\n\n" + report.longrepr.reprcrash.message
-            traceback_entries = report.longrepr.reprtraceback.reprentries
-            if len(traceback_entries) > 1:
+            tb_entries = report.longrepr.reprtraceback.reprentries
+            if len(tb_entries) > 1 and tb_entries[0].reprfileloc is not None:
                 # Handle third-party exceptions
-                lineno = traceback_entries[0].reprfileloc.lineno
+                lineno = tb_entries[0].reprfileloc.lineno
             else:
                 lineno = report.longrepr.reprcrash.lineno
         elif isinstance(report.longrepr, tuple):
