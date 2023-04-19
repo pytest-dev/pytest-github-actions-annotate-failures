@@ -1,14 +1,20 @@
 # -*- coding: utf-8 -*-
-from __future__ import print_function
+
+from __future__ import annotations, print_function
 
 import os
 import sys
 from collections import OrderedDict
+from typing import TYPE_CHECKING
 
 from _pytest._code.code import ExceptionRepr
-from _pytest.reports import CollectReport
 
 import pytest
+
+if TYPE_CHECKING:
+    from _pytest.nodes import Item
+    from _pytest.reports import CollectReport
+
 
 # Reference:
 # https://docs.pytest.org/en/latest/writing_plugins.html#hookwrapper-executing-around-other-hooks
@@ -20,7 +26,7 @@ import pytest
 
 
 @pytest.hookimpl(tryfirst=True, hookwrapper=True)
-def pytest_runtest_makereport(item, call):
+def pytest_runtest_makereport(item: Item, call):
     # execute all other hooks to obtain the report object
     outcome = yield
     report: CollectReport = outcome.get_result()
@@ -61,12 +67,13 @@ def pytest_runtest_makereport(item, call):
 
         # get the error message and line number from the actual error
         if isinstance(report.longrepr, ExceptionRepr):
-            longrepr += "\n\n" + report.longrepr.reprcrash.message
+            if report.longrepr.reprcrash is not None:
+                longrepr += "\n\n" + report.longrepr.reprcrash.message
             tb_entries = report.longrepr.reprtraceback.reprentries
             if len(tb_entries) > 1 and tb_entries[0].reprfileloc is not None:
                 # Handle third-party exceptions
                 lineno = tb_entries[0].reprfileloc.lineno
-            else:
+            elif report.longrepr.reprcrash is not None:
                 lineno = report.longrepr.reprcrash.lineno
         elif isinstance(report.longrepr, tuple):
             _, lineno, message = report.longrepr
