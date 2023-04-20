@@ -51,8 +51,8 @@ def test_annotation_pytest_error(testdir):
     testdir.monkeypatch.setenv("GITHUB_ACTIONS", "true")
     result = testdir.runpytest_subprocess()
 
-    result.stderr.fnmatch_lines(
-        ["::error file=test_annotation_pytest_error.py,line=8::test_error",]
+    result.stderr.re_match_lines(
+        [r"::error file=test_annotation_pytest_error\.py,line=8::test_error.*",]
     )
 
 
