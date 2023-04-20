@@ -34,6 +34,28 @@ def test_annotation_succeed_no_output(testdir):
     no_fnmatch_line(result, "::error file=test_annotation_succeed_no_output.py")
 
 
+def test_annotation_pytest_error(testdir):
+    testdir.makepyfile(
+        """
+        import pytest
+        pytest_plugins = 'pytest_github_actions_annotate_failures'
+
+        @pytest.fixture
+        def fixture():
+            return 1
+
+        def test_error():
+            assert fixture() == 1
+        """
+    )
+    testdir.monkeypatch.setenv("GITHUB_ACTIONS", "true")
+    result = testdir.runpytest_subprocess()
+
+    result.stderr.fnmatch_lines(
+        ["::error file=test_annotation_pytest_error.py,line=8::test_error",]
+    )
+
+
 def test_annotation_fail(testdir):
     testdir.makepyfile(
         """
