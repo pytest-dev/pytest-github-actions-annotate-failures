@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import annotations, print_function
+from __future__ import annotations
 
 import os
 import sys
