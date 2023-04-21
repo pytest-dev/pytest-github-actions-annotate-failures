@@ -127,14 +127,14 @@ if version.parse("6.0.0") <= PYTEST_VERSION:
     def pytest_addoption(parser):
         group = parser.getgroup("pytest_github_actions_annotate_failures")
         group.addoption(
-            "--exclude-warnings",
+            "--exclude-warning-annotations",
             action="store_true",
             default=False,
             help="Annotate failures in GitHub Actions.",
         )
 
     def pytest_configure(config):
-        if not config.option.exclude_warnings:
+        if not config.option.exclude_warning_annotations:
             config.pluginmanager.register(_AnnotateWarnings(), "annotate_warnings")
 
 

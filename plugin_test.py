@@ -139,7 +139,7 @@ def test_annotation_exclude_warnings(testdir):
         """
     )
     testdir.monkeypatch.setenv("GITHUB_ACTIONS", "true")
-    result = testdir.runpytest_subprocess("--exclude-warnings")
+    result = testdir.runpytest_subprocess("--exclude-warning-annotations")
     assert not result.stderr.lines
 
 
