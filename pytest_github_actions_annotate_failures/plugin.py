@@ -102,7 +102,17 @@ def _try_parse_multi_error_string_message(workspace, filesystempath, longrepr):
     if not all(matches):
         return None
 
-    return [(int(match.group(1)), match.group(2)) for match in matches]
+    errors_per_line = {}
+
+    for match in matches:
+        line_no = int(match.group(1))
+        message = match.group(2)
+        if line_no not in errors_per_line:
+            errors_per_line[line_no] = message
+        else:
+            errors_per_line[line_no] += "\n" + message
+
+    return errors_per_line.items()
 
 
 def _error_workflow_command(filesystempath, lineno, longrepr):
