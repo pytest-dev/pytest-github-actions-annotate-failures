@@ -82,7 +82,7 @@ def pytest_runtest_makereport(item: Item, call):  # noqa: ARG001
             if parsed_errors is not None:
                 for _lineno, _message in parsed_errors:
                     print(
-                        _error_workflow_command(filesystempath, lineno, _lineno + "\n\n" + _message), file=sys.stderr
+                        _error_workflow_command(filesystempath, _lineno, longrepr + "\n\n" + _message), file=sys.stderr
                     )
                 return
             else:
