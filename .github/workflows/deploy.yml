@@ -18,7 +18,7 @@ jobs:
         python-version: '3.11'
 
     - name: Install dependencies for build
-      run: pip install --upgrade setuptools wheel build
+      run: pip install --upgrade setuptools build
 
     - name: Build
       run: python -m build
