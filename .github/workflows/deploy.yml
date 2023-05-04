@@ -21,7 +21,7 @@ jobs:
       run: pip install --upgrade setuptools wheel build
 
     - name: Build
-      run: python setup.py sdist bdist_wheel
+      run: python -m build
 
     - name: Publish package
       uses: pypa/gh-action-pypi-publish@master
