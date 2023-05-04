@@ -11,6 +11,7 @@
 - Fix publish package workflow #74
 - Handle cases where pytest itself fails #70 (thanks to @edgarrmondragon)
 - Adopt PEP-621 for packaging #65 (thanks to @ssbarnea)
+- Bump pre-commit/action from 2.0.0 to 3.0.0 #56
 
 ## 0.1.8 (2022-12-20)
 
