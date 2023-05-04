@@ -8,6 +8,7 @@
 
 ### Other changes
 
+- Fix publish package workflow #74
 - Handle cases where pytest itself fails #70 (thanks to @edgarrmondragon)
 - Adopt PEP-621 for packaging #65 (thanks to @ssbarnea)
 
