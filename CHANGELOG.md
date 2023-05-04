@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.2.0 (2023-05-04)
+
+### Incompatible changes
+
+- Require python 3.7+ #66 (thanks to @ssbarnea)
+
+### Other changes
+
+- Handle cases where pytest itself fails #70 (thanks to @edgarrmondragon)
+- Adopt PEP-621 for packaging #65 (thanks to @ssbarnea)
+
 ## 0.1.8 (2022-12-20)
 
 No functionality change.
