@@ -18,7 +18,7 @@ jobs:
         python-version: '3.11'
 
     - name: Install dependencies for build
-      run: pip install --upgrade setuptools wheel
+      run: pip install --upgrade setuptools wheel build
 
     - name: Build
       run: python setup.py sdist bdist_wheel
