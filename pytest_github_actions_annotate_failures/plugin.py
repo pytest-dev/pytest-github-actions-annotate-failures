@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 from __future__ import annotations
 
@@ -7,9 +6,8 @@ import sys
 from collections import OrderedDict
 from typing import TYPE_CHECKING
 
-from _pytest._code.code import ExceptionRepr
-
 import pytest
+from _pytest._code.code import ExceptionRepr
 
 if TYPE_CHECKING:
     from _pytest.nodes import Item
@@ -26,7 +24,7 @@ if TYPE_CHECKING:
 
 
 @pytest.hookimpl(tryfirst=True, hookwrapper=True)
-def pytest_runtest_makereport(item: Item, call):
+def pytest_runtest_makereport(item: Item, call):  # noqa: ARG001
     # execute all other hooks to obtain the report object
     outcome = yield
     report: CollectReport = outcome.get_result()
@@ -93,13 +91,13 @@ def _error_workflow_command(filesystempath, lineno, longrepr):
     if lineno is not None:
         details_dict["line"] = lineno
 
-    details = ",".join("{}={}".format(k, v) for k, v in details_dict.items())
+    details = ",".join(f"{k}={v}" for k, v in details_dict.items())
 
     if longrepr is None:
-        return "\n::error {}".format(details)
-    else:
-        longrepr = _escape(longrepr)
-        return "\n::error {}::{}".format(details, longrepr)
+        return f"\n::error {details}"
+
+    longrepr = _escape(longrepr)
+    return f"\n::error {details}::{longrepr}"
 
 
 def _escape(s):

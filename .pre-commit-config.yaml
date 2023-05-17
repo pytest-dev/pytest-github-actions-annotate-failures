@@ -1,6 +1,6 @@
 repos:
 - repo: https://github.com/pre-commit/pre-commit-hooks
-  rev: v3.1.0
+  rev: "v4.4.0"
   hooks:
   - id: check-added-large-files
   - id: check-case-conflict
@@ -12,17 +12,14 @@ repos:
   - id: mixed-line-ending
   - id: requirements-txt-fixer
   - id: trailing-whitespace
-  - id: fix-encoding-pragma
 
 - repo: https://github.com/mgedmin/check-manifest
-  rev: "0.42"
+  rev: "0.49"
   hooks:
   - id: check-manifest
 
-- repo: https://github.com/PyCQA/flake8
-  rev: 3.8.3
+- repo: https://github.com/charliermarsh/ruff-pre-commit
+  rev: "v0.0.262"
   hooks:
-  - id: flake8
-    additional_dependencies:
-    - flake8-bugbear
-    - flake8-import-order
+  - id: ruff
+    args: ["--fix", "--show-fixes"]

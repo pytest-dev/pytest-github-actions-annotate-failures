@@ -1,10 +1,9 @@
-# -*- coding: utf-8 -*-
+from __future__ import annotations
+
 import os
 
-from packaging import version
-
 import pytest
-
+from packaging import version
 
 pytest_plugins = "pytester"
 
