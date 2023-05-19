@@ -85,8 +85,7 @@ def pytest_runtest_makereport(item: Item, call):  # noqa: ARG001
                         _error_workflow_command(filesystempath, _lineno, longrepr + "\n\n" + _message), file=sys.stderr
                     )
                 return
-            else:
-                longrepr += "\n\n" + report.longrepr
+            longrepr += "\n\n" + report.longrepr
         print(
             _error_workflow_command(filesystempath, lineno, longrepr), file=sys.stderr
         )
