@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import os
+import re
 import sys
 from collections import OrderedDict
 from typing import TYPE_CHECKING
@@ -43,7 +44,7 @@ def pytest_runtest_makereport(item: Item, call):  # noqa: ARG001
             filesystempath = os.path.join(runpath, filesystempath)
 
         # try to convert to absolute path in GitHub Actions
-        workspace = os.environ.get("GITHUB_WORKSPACE")
+        workspace = os.environ.get("GITHUB_WORKSPACE", "")
         if workspace:
             full_path = os.path.abspath(filesystempath)
             try:
@@ -77,11 +78,40 @@ def pytest_runtest_makereport(item: Item, call):  # noqa: ARG001
             _, lineno, message = report.longrepr
             longrepr += "\n\n" + message
         elif isinstance(report.longrepr, str):
+            parsed_errors = _try_parse_multi_error_string_message(workspace, filesystempath, report.longrepr)
+            if parsed_errors is not None:
+                for _lineno, _message in parsed_errors:
+                    print(
+                        _error_workflow_command(filesystempath, _lineno, longrepr + "\n\n" + _message), file=sys.stderr
+                    )
+                return
             longrepr += "\n\n" + report.longrepr
-
         print(
             _error_workflow_command(filesystempath, lineno, longrepr), file=sys.stderr
         )
+
+
+def _try_parse_multi_error_string_message(workspace, filesystempath, longrepr):
+    pathspec_regex = re.compile(
+        rf"(?:(?:{re.escape(workspace)}/)?{re.escape(filesystempath)}:)?(\d+):(?:\d+:)?\s*(.+)")
+    matches = [
+        pathspec_regex.match(line)
+        for line in longrepr.strip().split("\n")
+    ]
+    if not all(matches):
+        return None
+
+    errors_per_line = {}
+
+    for match in matches:
+        line_no = int(match.group(1))
+        message = match.group(2)
+        if line_no not in errors_per_line:
+            errors_per_line[line_no] = message
+        else:
+            errors_per_line[line_no] += "\n" + message
+
+    return errors_per_line.items()
 
 
 def _error_workflow_command(filesystempath, lineno, longrepr):
