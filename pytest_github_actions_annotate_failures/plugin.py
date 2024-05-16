@@ -1,6 +1,7 @@
 
 from __future__ import annotations
 
+import contextlib
 import os
 import sys
 from typing import TYPE_CHECKING
@@ -111,7 +112,8 @@ class _AnnotateWarnings:
             if not rel_path.startswith(".."):
                 filesystempath = rel_path
         else:
-            filesystempath = os.path.relpath(filesystempath)
+            with contextlib.suppress(ValueError):
+                filesystempath = os.path.relpath(filesystempath)
 
         workflow_command = _build_workflow_command(
             "warning",
