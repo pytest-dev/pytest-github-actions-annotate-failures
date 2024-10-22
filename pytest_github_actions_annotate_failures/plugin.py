@@ -1,13 +1,14 @@
 
 from __future__ import annotations
 
+import contextlib
 import os
 import sys
-from collections import OrderedDict
 from typing import TYPE_CHECKING
 
 import pytest
 from _pytest._code.code import ExceptionRepr
+from packaging import version
 
 if TYPE_CHECKING:
     from _pytest.nodes import Item
@@ -21,6 +22,9 @@ if TYPE_CHECKING:
 #
 # Inspired by:
 # https://github.com/pytest-dev/pytest/blob/master/src/_pytest/terminal.py
+
+
+PYTEST_VERSION = version.parse(pytest.__version__)
 
 
 @pytest.hookimpl(tryfirst=True, hookwrapper=True)
@@ -79,25 +83,91 @@ def pytest_runtest_makereport(item: Item, call):  # noqa: ARG001
         elif isinstance(report.longrepr, str):
             longrepr += "\n\n" + report.longrepr
 
-        print(
-            _error_workflow_command(filesystempath, lineno, longrepr), file=sys.stderr
+        workflow_command = _build_workflow_command(
+            "error",
+            filesystempath,
+            lineno,
+            message=longrepr,
         )
+        print(workflow_command, file=sys.stderr)
 
 
-def _error_workflow_command(filesystempath, lineno, longrepr):
-    # Build collection of arguments. Ordering is strict for easy testing
-    details_dict = OrderedDict()
-    details_dict["file"] = filesystempath
-    if lineno is not None:
-        details_dict["line"] = lineno
+class _AnnotateWarnings:
+    def pytest_warning_recorded(self, warning_message, when, nodeid, location):  # noqa: ARG002
+        # enable only in a workflow of GitHub Actions
+        # ref: https://help.github.com/en/actions/configuring-and-managing-workflows/using-environment-variables#default-environment-variables
+        if os.environ.get("GITHUB_ACTIONS") != "true":
+            return
 
-    details = ",".join(f"{k}={v}" for k, v in details_dict.items())
+        filesystempath = warning_message.filename
+        workspace = os.environ.get("GITHUB_WORKFLOW")
 
-    if longrepr is None:
-        return f"\n::error {details}"
+        if workspace:
+            try:
+                rel_path = os.path.relpath(filesystempath, workspace)
+            except ValueError:
+                # os.path.relpath() will raise ValueError on Windows
+                # when full_path and workspace have different mount points.
+                rel_path = filesystempath
+            if not rel_path.startswith(".."):
+                filesystempath = rel_path
+        else:
+            with contextlib.suppress(ValueError):
+                filesystempath = os.path.relpath(filesystempath)
 
-    longrepr = _escape(longrepr)
-    return f"\n::error {details}::{longrepr}"
+        workflow_command = _build_workflow_command(
+            "warning",
+            filesystempath,
+            warning_message.lineno,
+            message=warning_message.message.args[0],
+        )
+        print(workflow_command, file=sys.stderr)
+
+
+def pytest_addoption(parser):
+    group = parser.getgroup("pytest_github_actions_annotate_failures")
+    group.addoption(
+        "--exclude-warning-annotations",
+        action="store_true",
+        default=False,
+        help="Annotate failures in GitHub Actions.",
+    )
+
+def pytest_configure(config):
+    if not config.option.exclude_warning_annotations:
+        config.pluginmanager.register(_AnnotateWarnings(), "annotate_warnings")
+
+
+def _build_workflow_command(
+    command_name,
+    file,
+    line,
+    end_line=None,
+    column=None,
+    end_column=None,
+    title=None,
+    message=None,
+):
+    """Build a command to annotate a workflow."""
+    result = f"::{command_name} "
+
+    entries = [
+        ("file", file),
+        ("line", line),
+        ("endLine", end_line),
+        ("col", column),
+        ("endColumn", end_column),
+        ("title", title),
+    ]
+
+    result = result + ",".join(
+        f"{k}={v}" for k, v in entries if v is not None
+    )
+
+    if message is not None:
+        result = result + "::" + _escape(message)
+
+    return result
 
 
 def _escape(s):
