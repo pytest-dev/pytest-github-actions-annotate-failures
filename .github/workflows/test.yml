@@ -39,7 +39,7 @@ jobs:
         python-version: ${{ matrix.python-version }}
 
     - name: Install test dependencies
-      run: pip install tox tox-gh-actions
+      run: pip install tox tox-gh
 
     - name: Test packaging
       run: tox -e pkg
