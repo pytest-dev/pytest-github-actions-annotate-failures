@@ -39,7 +39,7 @@ jobs:
 
     - uses: astral-sh/setup-uv@v3
 
-    - name: Install test dependencies
+    - name: Install tox
       run: uv tool install --with tox-gh-actions --with tox-uv tox
 
     - name: Run tests with PyTest 6
