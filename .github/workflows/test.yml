@@ -7,6 +7,9 @@ on:
       - main
   pull_request:
 
+env:
+  FORCE_COLOR: "1"
+
 jobs:
   test:
     strategy:
@@ -37,22 +40,6 @@ jobs:
 
     - name: Test packaging
       run: tox -e pkg
-
-    - name: Run tests with PyTest 4
-      run: tox
-      if: "!startsWith(matrix.python-version, '3.1')"
-      env:
-        PLATFORM: ${{ matrix.os }}
-        PYTEST_MAJOR_VERSION: 4
-        PYTEST_PLUGINS: pytest_github_actions_annotate_failures
-
-    - name: Run tests with PyTest 5
-      run: tox
-      if: "!startsWith(matrix.python-version, '3.1')"
-      env:
-        PLATFORM: ${{ matrix.os }}
-        PYTEST_MAJOR_VERSION: 5
-        PYTEST_PLUGINS: pytest_github_actions_annotate_failures
 
     - name: Run tests with PyTest 6
       run: tox

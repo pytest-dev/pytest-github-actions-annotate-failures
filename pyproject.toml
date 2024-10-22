@@ -39,7 +39,7 @@ classifiers = [
 ]
 keywords = ["ansible", "testing", "molecule", "plugin"]
 dependencies = [
-    "pytest>=4.0.0"
+    "pytest>=6.0.0"
 ]
 
 [project.urls]

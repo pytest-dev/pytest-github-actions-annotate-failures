@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Incompatible changes
+
+- Require pytest 6+ #86 (thanks to @edgarrmondragon)
+
 ## 0.2.0 (2023-05-04)
 
 ### Incompatible changes
