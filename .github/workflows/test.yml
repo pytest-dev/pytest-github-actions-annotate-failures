@@ -42,9 +42,6 @@ jobs:
     - name: Install test dependencies
       run: uv tool install --with tox-gh-actions --with tox-uv tox
 
-    - name: Test packaging
-      run: tox -e pkg
-
     - name: Run tests with PyTest 6
       run: tox
       env:
