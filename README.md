@@ -19,7 +19,7 @@ jobs:
 
     - uses: actions/setup-python@v4
       with:
-        python-version: 3.7
+        python-version: 3.8
 
     - name: Install dependencies
       run: |
@@ -35,6 +35,10 @@ jobs:
 If your test is running in a Docker container, you have to install this plugin and manually set `GITHUB_ACTIONS` environment variable to `true` inside of Docker container. (For example, `docker-compose run --rm -e GITHUB_ACTIONS=true app -- pytest`)
 
 If your tests are run from a subdirectory of the git repository, you have to set the `PYTEST_RUN_PATH` environment variable to the path of that directory relative to the repository root in order for GitHub to identify the files with errors correctly.
+
+### Warning annotations
+
+This plugin also supports warning annotations when used with Pytest 6.0+. To disable warning annotations, pass `--exclude-warning-annotations` to pytest.
 
 ## Screenshot
 [![Image from Gyazo](https://i.gyazo.com/b578304465dd1b755ceb0e04692a57d9.png)](https://gyazo.com/b578304465dd1b755ceb0e04692a57d9)

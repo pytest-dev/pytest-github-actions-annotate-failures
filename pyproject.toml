@@ -8,7 +8,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 # https://peps.python.org/pep-0621/#readme
-requires-python = ">=3.7"
+requires-python = ">=3.8"
 version = "0.2.0"
 name = "pytest-github-actions-annotate-failures"
 description = "pytest plugin to annotate failed tests with a workflow command for GitHub Actions"
@@ -25,7 +25,6 @@ classifiers = [
   "License :: OSI Approved :: MIT License",
   "Framework :: Pytest",
   "Programming Language :: Python :: 3",
-  "Programming Language :: Python :: 3.7",
   "Programming Language :: Python :: 3.8",
   "Programming Language :: Python :: 3.9",
   "Programming Language :: Python :: 3.10",
@@ -51,6 +50,9 @@ changelog = "https://github.com/pytest-dev/pytest-github-actions-annotate-failur
 
 [project.entry-points.pytest11]
 pytest_github_actions_annotate_failures = "pytest_github_actions_annotate_failures.plugin"
+
+[project.optional-dependencies]
+test = ["packaging"]
 
 
 [tool.ruff.lint]

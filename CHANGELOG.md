@@ -4,6 +4,7 @@
 
 ### Incompatible changes
 
+- Require python 3.8+ #87 (thanks to @edgarrmondragon)
 - Require pytest 6+ #86 (thanks to @edgarrmondragon)
 
 ## 0.2.0 (2023-05-04)
