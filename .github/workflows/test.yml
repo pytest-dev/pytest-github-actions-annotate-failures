@@ -26,6 +26,7 @@ jobs:
           - '3.10'
           - '3.11'
           - '3.12'
+          - '3.13'
     runs-on: ${{ matrix.os }}
 
     name: ${{ matrix.os }}, Python ${{ matrix.python-version }}
@@ -42,22 +43,24 @@ jobs:
     - name: Install tox
       run: uv tool install --with tox-gh-actions --with tox-uv tox
 
-    - name: Run tests with PyTest 6
-      run: tox
-      env:
-        PYTEST_MAJOR_VERSION: 6
-        PYTEST_PLUGINS: pytest_github_actions_annotate_failures
-
-    - name: Run tests with PyTest 7
-      run: tox
-      env:
-        PYTEST_MAJOR_VERSION: 7
-        PYTEST_PLUGINS: pytest_github_actions_annotate_failures
-
     - name: Run tests with PyTest 8
       run: tox
       env:
         PYTEST_MAJOR_VERSION: 8
+        PYTEST_PLUGINS: pytest_github_actions_annotate_failures
+
+    - name: Run tests with PyTest 7
+      run: tox
+      if: runner.os != 'Windows'
+      env:
+        PYTEST_MAJOR_VERSION: 7
+        PYTEST_PLUGINS: pytest_github_actions_annotate_failures
+
+    - name: Run tests with PyTest 6
+      run: tox
+      if: runner.os != 'Windows'
+      env:
+        PYTEST_MAJOR_VERSION: 6
         PYTEST_PLUGINS: pytest_github_actions_annotate_failures
 
   post-test:
