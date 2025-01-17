@@ -1,4 +1,3 @@
-
 from __future__ import annotations
 
 import contextlib
@@ -7,7 +6,7 @@ import sys
 from typing import TYPE_CHECKING
 
 import pytest
-from _pytest._code.code import ExceptionRepr
+from _pytest._code.code import ExceptionRepr, ReprEntry
 from packaging import version
 
 if TYPE_CHECKING:
@@ -39,32 +38,12 @@ def pytest_runtest_makereport(item: Item, call):  # noqa: ARG001
         return
 
     if report.when == "call" and report.failed:
-        # collect information to be annotated
         filesystempath, lineno, _ = report.location
-
-        runpath = os.environ.get("PYTEST_RUN_PATH")
-        if runpath:
-            filesystempath = os.path.join(runpath, filesystempath)
-
-        # try to convert to absolute path in GitHub Actions
-        workspace = os.environ.get("GITHUB_WORKSPACE")
-        if workspace:
-            full_path = os.path.abspath(filesystempath)
-            try:
-                rel_path = os.path.relpath(full_path, workspace)
-            except ValueError:
-                # os.path.relpath() will raise ValueError on Windows
-                # when full_path and workspace have different mount points.
-                # https://github.com/utgwkk/pytest-github-actions-annotate-failures/issues/20
-                rel_path = filesystempath
-            if not rel_path.startswith(".."):
-                filesystempath = rel_path
 
         if lineno is not None:
             # 0-index to 1-index
             lineno += 1
 
-        # get the name of the current failed test, with parametrize info
         longrepr = report.head_line or item.name
 
         # get the error message and line number from the actual error
@@ -72,24 +51,50 @@ def pytest_runtest_makereport(item: Item, call):  # noqa: ARG001
             if report.longrepr.reprcrash is not None:
                 longrepr += "\n\n" + report.longrepr.reprcrash.message
             tb_entries = report.longrepr.reprtraceback.reprentries
-            if len(tb_entries) > 1 and tb_entries[0].reprfileloc is not None:
+            if tb_entries:
+                entry = tb_entries[0]
                 # Handle third-party exceptions
-                lineno = tb_entries[0].reprfileloc.lineno
+                if isinstance(entry, ReprEntry) and entry.reprfileloc is not None:
+                    lineno = entry.reprfileloc.lineno
+                    filesystempath = entry.reprfileloc.path
+
             elif report.longrepr.reprcrash is not None:
                 lineno = report.longrepr.reprcrash.lineno
         elif isinstance(report.longrepr, tuple):
-            _, lineno, message = report.longrepr
+            filesystempath, lineno, message = report.longrepr
             longrepr += "\n\n" + message
         elif isinstance(report.longrepr, str):
             longrepr += "\n\n" + report.longrepr
 
         workflow_command = _build_workflow_command(
             "error",
-            filesystempath,
+            compute_path(filesystempath),
             lineno,
             message=longrepr,
         )
         print(workflow_command, file=sys.stderr)
+
+
+def compute_path(filesystempath: str) -> str:
+    """Extract and process location information from the report."""
+    runpath = os.environ.get("PYTEST_RUN_PATH")
+    if runpath:
+        filesystempath = os.path.join(runpath, filesystempath)
+
+    # try to convert to absolute path in GitHub Actions
+    workspace = os.environ.get("GITHUB_WORKSPACE")
+    if workspace:
+        full_path = os.path.abspath(filesystempath)
+        try:
+            rel_path = os.path.relpath(full_path, workspace)
+        except ValueError:
+            # os.path.relpath() will raise ValueError on Windows
+            # when full_path and workspace have different mount points.
+            rel_path = filesystempath
+        if not rel_path.startswith(".."):
+            filesystempath = rel_path
+
+    return filesystempath
 
 
 class _AnnotateWarnings:
@@ -133,20 +138,21 @@ def pytest_addoption(parser):
         help="Annotate failures in GitHub Actions.",
     )
 
+
 def pytest_configure(config):
     if not config.option.exclude_warning_annotations:
         config.pluginmanager.register(_AnnotateWarnings(), "annotate_warnings")
 
 
 def _build_workflow_command(
-    command_name,
-    file,
-    line,
-    end_line=None,
-    column=None,
-    end_column=None,
-    title=None,
-    message=None,
+    command_name: str,
+    file: str,
+    line: int,
+    end_line: int | None = None,
+    column: int | None = None,
+    end_column: int | None = None,
+    title: str | None = None,
+    message: str | None = None,
 ):
     """Build a command to annotate a workflow."""
     result = f"::{command_name} "
@@ -160,9 +166,7 @@ def _build_workflow_command(
         ("title", title),
     ]
 
-    result = result + ",".join(
-        f"{k}={v}" for k, v in entries if v is not None
-    )
+    result = result + ",".join(f"{k}={v}" for k, v in entries if v is not None)
 
     if message is not None:
         result = result + "::" + _escape(message)
@@ -170,5 +174,5 @@ def _build_workflow_command(
     return result
 
 
-def _escape(s):
+def _escape(s: str) -> str:
     return s.replace("%", "%25").replace("\r", "%0D").replace("\n", "%0A")
