@@ -51,7 +51,8 @@ changelog = "https://github.com/pytest-dev/pytest-github-actions-annotate-failur
 [project.entry-points.pytest11]
 pytest_github_actions_annotate_failures = "pytest_github_actions_annotate_failures.plugin"
 
-[project.optional-dependencies]
+[dependency-groups]
+dev = [{ include-group = "test"}]
 test = ["packaging"]
 
 
