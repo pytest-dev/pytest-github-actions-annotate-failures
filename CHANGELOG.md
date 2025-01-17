@@ -4,7 +4,7 @@
 
 Nothing yet.
 
-## 0.2.0 (2025-01-17)
+## 0.3.0 (2025-01-17)
 
 - Test on Python 3.13 #89
 - Support pytest 7.4+ #97 (thanks to @edgarrmondragon)
