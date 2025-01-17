@@ -223,7 +223,7 @@ def test_annotation_fail_cwd(testdir: pytest.Testdir):
     result = testdir.runpytest_subprocess("--rootdir=foo")
     result.stderr.fnmatch_lines(
         [
-            "::error file=test_annotation_fail_cwd.py,line=5::test_fail*assert 0*",
+            "::error file=test_annotation_fail_cwd0/test_annotation_fail_cwd.py,line=5::test_fail*assert 0*",
         ]
     )
 
