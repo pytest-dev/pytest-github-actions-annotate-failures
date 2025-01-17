@@ -17,6 +17,7 @@ jobs:
     - uses: hynek/build-and-inspect-python-package@v2
 
   deploy:
+    needs: [dist]
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/v')
     permissions:
