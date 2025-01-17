@@ -4,8 +4,14 @@
 
 ### Incompatible changes
 
-- Require python 3.8+ #87 (thanks to @edgarrmondragon)
+- Test on Python 3.13 #89
+- Support pytest 7.4+ #97 (thanks to @edgarrmondragon)
+- Require Python 3.8+ #87 (thanks to @edgarrmondragon)
 - Require pytest 6+ #86 (thanks to @edgarrmondragon)
+- Speed up CI and testing #93
+- Use Ruff formatter #96
+- Use dependency-groups for tests #99
+- Add GitHub Attestations #100
 
 ## 0.2.0 (2023-05-04)
 
