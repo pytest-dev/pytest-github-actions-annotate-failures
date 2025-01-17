@@ -11,6 +11,7 @@
 - Speed up CI and testing #93
 - Use Ruff formatter #96
 - Use dependency-groups for tests #99
+- Add GitHub Attestations #100
 
 ## 0.2.0 (2023-05-04)
 
