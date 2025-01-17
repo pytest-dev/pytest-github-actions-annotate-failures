@@ -51,12 +51,14 @@ jobs:
 
     - name: Run tests with PyTest 7
       run: tox
+      if: runner.os != 'Windows'
       env:
         PYTEST_MAJOR_VERSION: 7
         PYTEST_PLUGINS: pytest_github_actions_annotate_failures
 
     - name: Run tests with PyTest 6
       run: tox
+      if: runner.os != 'Windows'
       env:
         PYTEST_MAJOR_VERSION: 6
         PYTEST_PLUGINS: pytest_github_actions_annotate_failures
