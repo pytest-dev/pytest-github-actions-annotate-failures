@@ -77,7 +77,6 @@ extend-select = [
 ]
 ignore = [
   "PLR",    # Design related pylint codes
-  "PT004",  # Use underscore for non-returning fixture (use usefixture instead)
 ]
 isort.required-imports = ["from __future__ import annotations"]
 

@@ -49,7 +49,9 @@ def test_annotation_pytest_error(testdir: pytest.Testdir):
     result = testdir.runpytest_subprocess()
 
     result.stderr.re_match_lines(
-        [r"::error file=test_annotation_pytest_error\.py,line=8::test_error.*",]
+        [
+            r"::error file=test_annotation_pytest_error\.py,line=8::test_error.*",
+        ]
     )
 
 

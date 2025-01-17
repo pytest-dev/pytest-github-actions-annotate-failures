@@ -1,4 +1,3 @@
-
 from __future__ import annotations
 
 import contextlib
@@ -133,6 +132,7 @@ def pytest_addoption(parser):
         help="Annotate failures in GitHub Actions.",
     )
 
+
 def pytest_configure(config):
     if not config.option.exclude_warning_annotations:
         config.pluginmanager.register(_AnnotateWarnings(), "annotate_warnings")
@@ -160,9 +160,7 @@ def _build_workflow_command(
         ("title", title),
     ]
 
-    result = result + ",".join(
-        f"{k}={v}" for k, v in entries if v is not None
-    )
+    result = result + ",".join(f"{k}={v}" for k, v in entries if v is not None)
 
     if message is not None:
         result = result + "::" + _escape(message)
