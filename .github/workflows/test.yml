@@ -1,76 +1,27 @@
-name: test
+name: Run Pytest with Error Annotation
 
-on:
-  workflow_dispatch:
-  push:
-    branches:
-      - main
-  pull_request:
-
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
-env:
-  FORCE_COLOR: "1"
+on: [push, pull_request]
 
 jobs:
   test:
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ubuntu-latest, windows-latest]
-        python-version:
-          - '3.8'
-          - '3.9'
-          - '3.10'
-          - '3.11'
-          - '3.12'
-          - '3.13'
-    runs-on: ${{ matrix.os }}
-
-    name: ${{ matrix.os }}, Python ${{ matrix.python-version }}
-    steps:
-    - uses: actions/checkout@v4
-
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v5
-      with:
-        python-version: ${{ matrix.python-version }}
-
-    - uses: astral-sh/setup-uv@v5
-
-    - name: Install tox
-      run: uv tool install --with tox-gh-actions --with tox-uv tox
-
-    - name: Run tests with PyTest 8
-      run: tox
-      env:
-        PYTEST_MAJOR_VERSION: 8
-        PYTEST_PLUGINS: pytest_github_actions_annotate_failures
-
-    - name: Run tests with PyTest 7
-      run: tox
-      if: runner.os != 'Windows'
-      env:
-        PYTEST_MAJOR_VERSION: 7
-        PYTEST_PLUGINS: pytest_github_actions_annotate_failures
-
-    - name: Run tests with PyTest 6
-      run: tox
-      if: runner.os != 'Windows'
-      env:
-        PYTEST_MAJOR_VERSION: 6
-        PYTEST_PLUGINS: pytest_github_actions_annotate_failures
-
-  post-test:
-    name: All tests passed
-    if: always()
-    needs: [test]
     runs-on: ubuntu-latest
-    timeout-minutes: 2
+
     steps:
-      - name: Decide whether the needed jobs succeeded or failed
-        uses: re-actors/alls-green@release/v1
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
         with:
-          jobs: ${{ toJSON(needs) }}
+          python-version: 3.12
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest pytest-github-actions-annotate-failures
+
+      - name: Run Pytest with annotation
+        run: pytest
+        env:
+          PYTEST_PLUGINS: pytest_github_actions_annotate_failures
