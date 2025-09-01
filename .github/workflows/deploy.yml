@@ -13,8 +13,8 @@ jobs:
   dist:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v5
-    - uses: hynek/build-and-inspect-python-package@v2
+    - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+    - uses: hynek/build-and-inspect-python-package@c52c3a4710070b50470d903818a7b25115dcd076 # v2.13.0
 
   deploy:
     needs: [dist]
@@ -25,17 +25,17 @@ jobs:
       attestations: write
 
     steps:
-    - uses: actions/download-artifact@v5
+    - uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5.0.0
       with:
         name: Packages
         path: dist
 
     - name: Generate artifact attestation for sdist and wheel
-      uses: actions/attest-build-provenance@v3
+      uses: actions/attest-build-provenance@977bb373ede98d70efdf65b84cb5f73e068dcc2a # v3.0.0
       with:
         subject-path: "dist/*"
 
     - name: Publish package
-      uses: pypa/gh-action-pypi-publish@release/v1
+      uses: pypa/gh-action-pypi-publish@76f52bc884231f62b9a034ebfe128415bbaabdfc # v1.12.4
       with:
         password: ${{ secrets.pypi_password }}
