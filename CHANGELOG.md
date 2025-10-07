@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-Nothing yet.
+- Test on Python 3.14 #115
 
 ## 0.3.0 (2025-01-17)
 
