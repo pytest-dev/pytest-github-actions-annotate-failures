@@ -27,6 +27,7 @@ jobs:
           - '3.11'
           - '3.12'
           - '3.13'
+          - '3.14'
     runs-on: ${{ matrix.os }}
 
     name: ${{ matrix.os }}, Python ${{ matrix.python-version }}
@@ -37,6 +38,7 @@ jobs:
       uses: actions/setup-python@v6
       with:
         python-version: ${{ matrix.python-version }}
+        allow-prereleases: true
 
     - uses: astral-sh/setup-uv@v6
 
@@ -58,7 +60,7 @@ jobs:
 
     - name: Run tests with PyTest 6
       run: tox
-      if: runner.os != 'Windows'
+      if: runner.os != 'Windows' && matrix.python-version != '3.14'
       env:
         PYTEST_MAJOR_VERSION: 6
         PYTEST_PLUGINS: pytest_github_actions_annotate_failures
