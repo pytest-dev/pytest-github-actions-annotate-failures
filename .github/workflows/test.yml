@@ -45,6 +45,13 @@ jobs:
     - name: Install tox
       run: uv tool install --with tox-gh-actions --with tox-uv tox
 
+    - name: Run tests with PyTest 9
+      run: tox
+      if: matrix.python-version != '3.8' && matrix.python-version != '3.9'
+      env:
+        PYTEST_MAJOR_VERSION: 9
+        PYTEST_PLUGINS: pytest_github_actions_annotate_failures
+
     - name: Run tests with PyTest 8
       run: tox
       env:
