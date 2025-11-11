@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Fix internal error when processing warnings #117
 - Test on Python 3.14 #115
 
 ## 0.3.0 (2025-01-17)

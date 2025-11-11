@@ -10,6 +10,8 @@ from _pytest._code.code import ExceptionRepr, ReprEntry
 from packaging import version
 
 if TYPE_CHECKING:
+    from warnings import WarningMessage
+
     from _pytest.nodes import Item
     from _pytest.reports import CollectReport
 
@@ -98,7 +100,13 @@ def compute_path(filesystempath: str) -> str:
 
 
 class _AnnotateWarnings:
-    def pytest_warning_recorded(self, warning_message, when, nodeid, location):  # noqa: ARG002
+    def pytest_warning_recorded(
+        self,
+        warning_message: WarningMessage,
+        when: str,  # noqa: ARG002
+        nodeid: str,  # noqa: ARG002
+        location: tuple[str, int, str],  # noqa: ARG002
+    ):
         # enable only in a workflow of GitHub Actions
         # ref: https://help.github.com/en/actions/configuring-and-managing-workflows/using-environment-variables#default-environment-variables
         if os.environ.get("GITHUB_ACTIONS") != "true":
@@ -124,7 +132,7 @@ class _AnnotateWarnings:
             "warning",
             filesystempath,
             warning_message.lineno,
-            message=warning_message.message.args[0],
+            message=str(warning_message.message),
         )
         print(workflow_command, file=sys.stderr)
 
