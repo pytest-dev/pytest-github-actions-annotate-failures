@@ -327,6 +327,31 @@ def test_annotation_param(testdir: pytest.Testdir):
     )
 
 
+@pytest.mark.skipif(
+    version.parse("9.0.0") > PYTEST_VERSION,
+    reason="subtests are only supported in pytest 9+",
+)
+def test_annotation_subtest(testdir: pytest.Testdir):
+    testdir.makepyfile(
+        """
+        import pytest
+        pytest_plugins = 'pytest_github_actions_annotate_failures'
+
+        def test(subtests):
+            for i in range(5):
+                with subtests.test(msg="custom message", i=i):
+                    assert i % 2 == 0
+        """
+    )
+    testdir.monkeypatch.setenv("GITHUB_ACTIONS", "true")
+    result = testdir.runpytest_subprocess()
+    result.stderr.fnmatch_lines(
+        [
+            "::error file=test_annotation_subtest.py,line=7::test?custom message?0*assert 1 == 0*",
+        ]
+    )
+
+
 # Debugging / development tip:
 # Add a breakpoint() to the place you are going to check,
 # uncomment this example, and run it with:
