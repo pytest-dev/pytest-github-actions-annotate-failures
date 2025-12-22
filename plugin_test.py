@@ -132,6 +132,30 @@ def test_annotation_exclude_warnings(testdir: pytest.Testdir):
     assert not result.stderr.lines
 
 
+def test_annotation_warning_cwd(testdir: pytest.Testdir):
+    testdir.makepyfile(
+        """
+        import warnings
+        import pytest
+        pytest_plugins = 'pytest_github_actions_annotate_failures'
+
+        def test_warning():
+            warnings.warn('beware', Warning)
+            assert 1
+        """
+    )
+    testdir.monkeypatch.setenv("GITHUB_ACTIONS", "true")
+    testdir.monkeypatch.setenv("GITHUB_WORKSPACE", os.path.dirname(str(testdir.tmpdir)))
+    testdir.mkdir("foo")
+    testdir.makefile(".ini", pytest="[pytest]\ntestpaths=..")
+    result = testdir.runpytest_subprocess("--rootdir=foo")
+    result.stderr.fnmatch_lines(
+        [
+            "::warning file=test_annotation_warning_cwd0/test_annotation_warning_cwd.py,line=6::beware",
+        ]
+    )
+
+
 def test_annotation_third_party_exception(testdir: pytest.Testdir):
     testdir.makepyfile(
         my_module="""
