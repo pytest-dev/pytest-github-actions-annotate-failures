@@ -1,7 +1,8 @@
 # Changelog
 
-## Unreleased
+## 0.3.1 (TODO)
 
+- Use `GITHUB_WORKSPACE` instead of `GITHUB_WORKFLOW` to determine file location when processing warnings (124
 - Fix internal error when processing warnings #117
 - Test on Python 3.14 #115
 - Require pytest 7+ #116
