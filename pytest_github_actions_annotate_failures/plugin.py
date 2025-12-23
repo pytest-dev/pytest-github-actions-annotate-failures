@@ -113,7 +113,7 @@ class _AnnotateWarnings:
             return
 
         filesystempath = warning_message.filename
-        workspace = os.environ.get("GITHUB_WORKFLOW")
+        workspace = os.environ.get("GITHUB_WORKSPACE")
 
         if workspace:
             try:
