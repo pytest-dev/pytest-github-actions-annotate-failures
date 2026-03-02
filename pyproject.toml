@@ -1,14 +1,6 @@
-[build-system]
-requires = [
-  "setuptools >= 64.0.0", # required by pyproject+setuptools_scm integration
-  "setuptools_scm[toml] >= 7.0.5", # required for "no-local-version" scheme
-
-]
-build-backend = "setuptools.build_meta"
-
 [project]
 # https://peps.python.org/pep-0621/#readme
-requires-python = ">=3.8"
+requires-python = ">=3.10"
 version = "0.3.0"
 name = "pytest-github-actions-annotate-failures"
 description = "pytest plugin to annotate failed tests with a workflow command for GitHub Actions"
@@ -19,67 +11,69 @@ license = { text = "MIT" }
 classifiers = [
   "Development Status :: 5 - Production/Stable",
   "Environment :: Console",
+  "Framework :: Pytest",
   "Intended Audience :: Developers",
   "Intended Audience :: Information Technology",
   "Intended Audience :: System Administrators",
   "License :: OSI Approved :: MIT License",
-  "Framework :: Pytest",
+  "Programming Language :: Python",
   "Programming Language :: Python :: 3",
-  "Programming Language :: Python :: 3.8",
-  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3 :: Only",
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
   "Programming Language :: Python :: 3.13",
   "Programming Language :: Python :: 3.14",
-  "Programming Language :: Python :: 3 :: Only",
-  "Programming Language :: Python",
-  "Topic :: System :: Systems Administration",
   "Topic :: Software Development :: Quality Assurance",
   "Topic :: Software Development :: Testing",
+  "Topic :: System :: Systems Administration",
   "Topic :: Utilities",
 ]
-keywords = ["ansible", "testing", "molecule", "plugin"]
-dependencies = [
-    "pytest>=7.0.0"
-]
+keywords = ["ansible", "molecule", "plugin", "testing"]
+dependencies = ["pytest>=7.0.0"]
 
 [project.urls]
+changelog = "https://github.com/pytest-dev/pytest-github-actions-annotate-failures/releases"
 homepage = "https://github.com/pytest-dev/pytest-github-actions-annotate-failures"
 repository = "https://github.com/pytest-dev/pytest-github-actions-annotate-failures"
-changelog = "https://github.com/pytest-dev/pytest-github-actions-annotate-failures/releases"
 
 [project.entry-points.pytest11]
 pytest_github_actions_annotate_failures = "pytest_github_actions_annotate_failures.plugin"
 
 [dependency-groups]
-dev = [{ include-group = "test"}]
+dev = [{ include-group = "test" }]
 test = ["packaging"]
 
+[build-system]
+requires = [
+  "setuptools_scm[toml] >= 7.0.5",  # required for "no-local-version" scheme
+  "setuptools >= 64.0.0",  # required by pyproject+setuptools_scm integration
+]
+build-backend = "setuptools.build_meta"
 
 [tool.ruff.lint]
 extend-select = [
-  "B",           # flake8-bugbear
-  "I",           # isort
-  "ARG",         # flake8-unused-arguments
-  "C4",          # flake8-comprehensions
-  "EM",          # flake8-errmsg
-  "ICN",         # flake8-import-conventions
-  "ISC",         # flake8-implicit-str-concat
-  "G",           # flake8-logging-format
-  "PGH",         # pygrep-hooks
-  "PIE",         # flake8-pie
-  "PL",          # pylint
-  "PT",          # flake8-pytest-style
-  "RET",         # flake8-return
-  "RUF",         # Ruff-specific
-  "SIM",         # flake8-simplify
-  "UP",          # pyupgrade
-  "YTT",         # flake8-2020
-  "EXE",         # flake8-executable
+  "B",  # flake8-bugbear
+  "I",  # isort
+  "ARG",  # flake8-unused-arguments
+  "C4",  # flake8-comprehensions
+  "EM",  # flake8-errmsg
+  "ICN",  # flake8-import-conventions
+  "ISC",  # flake8-implicit-str-concat
+  "G",  # flake8-logging-format
+  "PGH",  # pygrep-hooks
+  "PIE",  # flake8-pie
+  "PL",  # pylint
+  "PT",  # flake8-pytest-style
+  "RET",  # flake8-return
+  "RUF",  # Ruff-specific
+  "SIM",  # flake8-simplify
+  "UP",  # pyupgrade
+  "YTT",  # flake8-2020
+  "EXE",  # flake8-executable
 ]
 ignore = [
-  "PLR",    # Design related pylint codes
+  "PLR",  # Design related pylint codes
 ]
 isort.required-imports = ["from __future__ import annotations"]
 
