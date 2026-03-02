@@ -21,49 +21,46 @@ jobs:
       matrix:
         os: [ubuntu-latest, windows-latest]
         python-version:
-          - '3.8'
-          - '3.9'
-          - '3.10'
-          - '3.11'
-          - '3.12'
-          - '3.13'
-          - '3.14'
+          - "3.10"
+          - "3.11"
+          - "3.12"
+          - "3.13"
+          - "3.14"
     runs-on: ${{ matrix.os }}
 
     name: ${{ matrix.os }}, Python ${{ matrix.python-version }}
     steps:
-    - uses: actions/checkout@v6
+      - uses: actions/checkout@v6
 
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v6
-      with:
-        python-version: ${{ matrix.python-version }}
-        allow-prereleases: true
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v6
+        with:
+          python-version: ${{ matrix.python-version }}
+          allow-prereleases: true
 
-    - uses: astral-sh/setup-uv@v7
+      - uses: astral-sh/setup-uv@v7
 
-    - name: Install tox
-      run: uv tool install --with tox-gh-actions --with tox-uv tox
+      - name: Install tox
+        run: uv tool install --with tox-gh-actions --with tox-uv tox
 
-    - name: Run tests with PyTest 9
-      run: tox
-      if: matrix.python-version != '3.8' && matrix.python-version != '3.9'
-      env:
-        PYTEST_MAJOR_VERSION: 9
-        PYTEST_PLUGINS: pytest_github_actions_annotate_failures
+      - name: Run tests with PyTest 9
+        run: tox
+        env:
+          PYTEST_MAJOR_VERSION: 9
+          PYTEST_PLUGINS: pytest_github_actions_annotate_failures
 
-    - name: Run tests with PyTest 8
-      run: tox
-      env:
-        PYTEST_MAJOR_VERSION: 8
-        PYTEST_PLUGINS: pytest_github_actions_annotate_failures
+      - name: Run tests with PyTest 8
+        run: tox
+        env:
+          PYTEST_MAJOR_VERSION: 8
+          PYTEST_PLUGINS: pytest_github_actions_annotate_failures
 
-    - name: Run tests with PyTest 7
-      run: tox
-      if: runner.os != 'Windows'
-      env:
-        PYTEST_MAJOR_VERSION: 7
-        PYTEST_PLUGINS: pytest_github_actions_annotate_failures
+      - name: Run tests with PyTest 7
+        run: tox
+        if: runner.os != 'Windows'
+        env:
+          PYTEST_MAJOR_VERSION: 7
+          PYTEST_PLUGINS: pytest_github_actions_annotate_failures
 
   post-test:
     name: All tests passed
