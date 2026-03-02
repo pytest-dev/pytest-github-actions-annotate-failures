@@ -1,13 +1,13 @@
 [project]
-# https://peps.python.org/pep-0621/#readme
-requires-python = ">=3.10"
-version = "0.3.0"
 name = "pytest-github-actions-annotate-failures"
 description = "pytest plugin to annotate failed tests with a workflow command for GitHub Actions"
 readme = "README.md"
+# https://peps.python.org/pep-0621/#readme
+requires-python = ">=3.10"
+license = "MIT"
 authors = [{ "name" = "utgwkk", "email" = "utagawakiki@gmail.com" }]
 maintainers = [{ "name" = "utgwkk", "email" = "utagawakiki@gmail.com" }]
-license = { text = "MIT" }
+keywords = ["plugin", "pytest", "testing"]
 classifiers = [
   "Development Status :: 5 - Production/Stable",
   "Environment :: Console",
@@ -15,7 +15,6 @@ classifiers = [
   "Intended Audience :: Developers",
   "Intended Audience :: Information Technology",
   "Intended Audience :: System Administrators",
-  "License :: OSI Approved :: MIT License",
   "Programming Language :: Python",
   "Programming Language :: Python :: 3",
   "Programming Language :: Python :: 3 :: Only",
@@ -29,8 +28,8 @@ classifiers = [
   "Topic :: System :: Systems Administration",
   "Topic :: Utilities",
 ]
-keywords = ["ansible", "molecule", "plugin", "testing"]
 dependencies = ["pytest>=7.0.0"]
+dynamic = ["version"]
 
 [project.urls]
 changelog = "https://github.com/pytest-dev/pytest-github-actions-annotate-failures/releases"
@@ -79,3 +78,17 @@ isort.required-imports = ["from __future__ import annotations"]
 
 [tool.ruff.lint.per-file-ignores]
 "tests/**" = ["T20"]
+
+[tool.setuptools_scm]
+# To prevent accidental pick of mobile version tags such 'v6'
+git_describe_command = [
+  "git",
+  "describe",
+  "--dirty",
+  "--long",
+  "--tags",
+  "--match",
+  "v*.*",
+]
+local_scheme = "no-local-version"
+tag_regex = "^(?P<prefix>v)?(?P<version>\\d+[^\\+]*)(?P<suffix>.*)?$"

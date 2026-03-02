@@ -2,6 +2,5 @@ include *.py
 include *.txt
 include *.yaml
 include .pre-commit-config.yaml
-include CHANGELOG.md
 include LICENSE
 include tox.ini
