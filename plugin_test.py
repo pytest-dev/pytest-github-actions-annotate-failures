@@ -9,14 +9,11 @@ PYTEST_VERSION = version.parse(pytest.__version__)
 pytest_plugins = "pytester"
 
 
-# result.stderr.no_fnmatch_line() was added to testdir on pytest 5.3.0
-# https://docs.pytest.org/en/stable/changelog.html#pytest-5-3-0-2019-11-19
-def no_fnmatch_line(result: pytest.RunResult, pattern: str):
-    result.stderr.no_fnmatch_line(pattern + "*")
-
-
-def test_annotation_succeed_no_output(testdir: pytest.Testdir):
-    testdir.makepyfile(
+def test_annotation_succeed_no_output(
+    pytester: pytest.Pytester,
+    monkeypatch: pytest.MonkeyPatch,
+):
+    pytester.makepyfile(
         """
         import pytest
         pytest_plugins = 'pytest_github_actions_annotate_failures'
@@ -25,14 +22,16 @@ def test_annotation_succeed_no_output(testdir: pytest.Testdir):
             assert 1
         """
     )
-    testdir.monkeypatch.setenv("GITHUB_ACTIONS", "true")
-    result = testdir.runpytest_subprocess()
+    monkeypatch.setenv("GITHUB_ACTIONS", "true")
+    result = pytester.runpytest_subprocess()
+    result.stderr.no_fnmatch_line("::error file=test_annotation_succeed_no_output.py*")
 
-    no_fnmatch_line(result, "::error file=test_annotation_succeed_no_output.py")
 
-
-def test_annotation_pytest_error(testdir: pytest.Testdir):
-    testdir.makepyfile(
+def test_annotation_pytest_error(
+    pytester: pytest.Pytester,
+    monkeypatch: pytest.MonkeyPatch,
+):
+    pytester.makepyfile(
         """
         import pytest
         pytest_plugins = 'pytest_github_actions_annotate_failures'
@@ -45,8 +44,8 @@ def test_annotation_pytest_error(testdir: pytest.Testdir):
             assert fixture() == 1
         """
     )
-    testdir.monkeypatch.setenv("GITHUB_ACTIONS", "true")
-    result = testdir.runpytest_subprocess()
+    monkeypatch.setenv("GITHUB_ACTIONS", "true")
+    result = pytester.runpytest_subprocess()
 
     result.stderr.re_match_lines(
         [
@@ -55,8 +54,8 @@ def test_annotation_pytest_error(testdir: pytest.Testdir):
     )
 
 
-def test_annotation_fail(testdir: pytest.Testdir):
-    testdir.makepyfile(
+def test_annotation_fail(pytester: pytest.Pytester, monkeypatch: pytest.MonkeyPatch):
+    pytester.makepyfile(
         """
         import pytest
         pytest_plugins = 'pytest_github_actions_annotate_failures'
@@ -65,8 +64,8 @@ def test_annotation_fail(testdir: pytest.Testdir):
             assert 0
         """
     )
-    testdir.monkeypatch.setenv("GITHUB_ACTIONS", "true")
-    result = testdir.runpytest_subprocess()
+    monkeypatch.setenv("GITHUB_ACTIONS", "true")
+    result = pytester.runpytest_subprocess()
     result.stderr.fnmatch_lines(
         [
             "::error file=test_annotation_fail.py,line=5::test_fail*assert 0*",
@@ -74,8 +73,11 @@ def test_annotation_fail(testdir: pytest.Testdir):
     )
 
 
-def test_annotation_exception(testdir: pytest.Testdir):
-    testdir.makepyfile(
+def test_annotation_exception(
+    pytester: pytest.Pytester,
+    monkeypatch: pytest.MonkeyPatch,
+):
+    pytester.makepyfile(
         """
         import pytest
         pytest_plugins = 'pytest_github_actions_annotate_failures'
@@ -85,8 +87,8 @@ def test_annotation_exception(testdir: pytest.Testdir):
             assert 1
         """
     )
-    testdir.monkeypatch.setenv("GITHUB_ACTIONS", "true")
-    result = testdir.runpytest_subprocess()
+    monkeypatch.setenv("GITHUB_ACTIONS", "true")
+    result = pytester.runpytest_subprocess()
     result.stderr.fnmatch_lines(
         [
             "::error file=test_annotation_exception.py,line=5::test_fail*oops*",
@@ -94,8 +96,8 @@ def test_annotation_exception(testdir: pytest.Testdir):
     )
 
 
-def test_annotation_warning(testdir: pytest.Testdir):
-    testdir.makepyfile(
+def test_annotation_warning(pytester: pytest.Pytester, monkeypatch: pytest.MonkeyPatch):
+    pytester.makepyfile(
         """
         import warnings
         import pytest
@@ -106,8 +108,8 @@ def test_annotation_warning(testdir: pytest.Testdir):
             assert 1
         """
     )
-    testdir.monkeypatch.setenv("GITHUB_ACTIONS", "true")
-    result = testdir.runpytest_subprocess()
+    monkeypatch.setenv("GITHUB_ACTIONS", "true")
+    result = pytester.runpytest_subprocess()
     result.stderr.fnmatch_lines(
         [
             "::warning file=test_annotation_warning.py,line=6::beware",
@@ -115,8 +117,11 @@ def test_annotation_warning(testdir: pytest.Testdir):
     )
 
 
-def test_annotation_exclude_warnings(testdir: pytest.Testdir):
-    testdir.makepyfile(
+def test_annotation_exclude_warnings(
+    pytester: pytest.Pytester,
+    monkeypatch: pytest.MonkeyPatch,
+):
+    pytester.makepyfile(
         """
         import warnings
         import pytest
@@ -127,13 +132,16 @@ def test_annotation_exclude_warnings(testdir: pytest.Testdir):
             assert 1
         """
     )
-    testdir.monkeypatch.setenv("GITHUB_ACTIONS", "true")
-    result = testdir.runpytest_subprocess("--exclude-warning-annotations")
+    monkeypatch.setenv("GITHUB_ACTIONS", "true")
+    result = pytester.runpytest_subprocess("--exclude-warning-annotations")
     assert not result.stderr.lines
 
 
-def test_annotation_warning_cwd(testdir: pytest.Testdir):
-    testdir.makepyfile(
+def test_annotation_warning_cwd(
+    pytester: pytest.Pytester,
+    monkeypatch: pytest.MonkeyPatch,
+):
+    pytester.makepyfile(
         """
         import warnings
         import pytest
@@ -144,11 +152,11 @@ def test_annotation_warning_cwd(testdir: pytest.Testdir):
             assert 1
         """
     )
-    testdir.monkeypatch.setenv("GITHUB_ACTIONS", "true")
-    testdir.monkeypatch.setenv("GITHUB_WORKSPACE", os.path.dirname(str(testdir.tmpdir)))
-    testdir.mkdir("foo")
-    testdir.makefile(".ini", pytest="[pytest]\ntestpaths=..")
-    result = testdir.runpytest_subprocess("--rootdir=foo")
+    monkeypatch.setenv("GITHUB_ACTIONS", "true")
+    monkeypatch.setenv("GITHUB_WORKSPACE", os.path.dirname(str(pytester.path)))
+    pytester.mkdir("foo")
+    pytester.makefile(".ini", pytest="[pytest]\ntestpaths=..")
+    result = pytester.runpytest_subprocess("--rootdir=foo")
     result.stderr.fnmatch_lines(
         [
             "::warning file=test_annotation_warning_cwd0/test_annotation_warning_cwd.py,line=6::beware",
@@ -156,15 +164,18 @@ def test_annotation_warning_cwd(testdir: pytest.Testdir):
     )
 
 
-def test_annotation_third_party_exception(testdir: pytest.Testdir):
-    testdir.makepyfile(
+def test_annotation_third_party_exception(
+    pytester: pytest.Pytester,
+    monkeypatch: pytest.MonkeyPatch,
+):
+    pytester.makepyfile(
         my_module="""
         def fn():
             raise Exception('oops')
         """
     )
 
-    testdir.makepyfile(
+    pytester.makepyfile(
         """
         import pytest
         from my_module import fn
@@ -174,8 +185,8 @@ def test_annotation_third_party_exception(testdir: pytest.Testdir):
             fn()
         """
     )
-    testdir.monkeypatch.setenv("GITHUB_ACTIONS", "true")
-    result = testdir.runpytest_subprocess()
+    monkeypatch.setenv("GITHUB_ACTIONS", "true")
+    result = pytester.runpytest_subprocess()
     result.stderr.fnmatch_lines(
         [
             "::error file=test_annotation_third_party_exception.py,line=6::test_fail*oops*",
@@ -183,8 +194,11 @@ def test_annotation_third_party_exception(testdir: pytest.Testdir):
     )
 
 
-def test_annotation_third_party_warning(testdir: pytest.Testdir):
-    testdir.makepyfile(
+def test_annotation_third_party_warning(
+    pytester: pytest.Pytester,
+    monkeypatch: pytest.MonkeyPatch,
+):
+    pytester.makepyfile(
         my_module="""
         import warnings
 
@@ -193,7 +207,7 @@ def test_annotation_third_party_warning(testdir: pytest.Testdir):
         """
     )
 
-    testdir.makepyfile(
+    pytester.makepyfile(
         """
         import pytest
         from my_module import fn
@@ -203,8 +217,8 @@ def test_annotation_third_party_warning(testdir: pytest.Testdir):
             fn()
         """
     )
-    testdir.monkeypatch.setenv("GITHUB_ACTIONS", "true")
-    result = testdir.runpytest_subprocess()
+    monkeypatch.setenv("GITHUB_ACTIONS", "true")
+    result = pytester.runpytest_subprocess()
     result.stderr.fnmatch_lines(
         # ["::warning file=test_annotation_third_party_warning.py,line=6::beware",]
         [
@@ -213,8 +227,11 @@ def test_annotation_third_party_warning(testdir: pytest.Testdir):
     )
 
 
-def test_annotation_fail_disabled_outside_workflow(testdir: pytest.Testdir):
-    testdir.makepyfile(
+def test_annotation_fail_disabled_outside_workflow(
+    pytester: pytest.Pytester,
+    monkeypatch: pytest.MonkeyPatch,
+):
+    pytester.makepyfile(
         """
         import pytest
         pytest_plugins = 'pytest_github_actions_annotate_failures'
@@ -223,15 +240,18 @@ def test_annotation_fail_disabled_outside_workflow(testdir: pytest.Testdir):
             assert 0
         """
     )
-    testdir.monkeypatch.setenv("GITHUB_ACTIONS", "")
-    result = testdir.runpytest_subprocess()
-    no_fnmatch_line(
-        result, "::error file=test_annotation_fail_disabled_outside_workflow.py*"
+    monkeypatch.setenv("GITHUB_ACTIONS", "")
+    result = pytester.runpytest_subprocess()
+    result.stderr.no_fnmatch_line(
+        "::error file=test_annotation_fail_disabled_outside_workflow.py*"
     )
 
 
-def test_annotation_fail_cwd(testdir: pytest.Testdir):
-    testdir.makepyfile(
+def test_annotation_fail_cwd(
+    pytester: pytest.Pytester,
+    monkeypatch: pytest.MonkeyPatch,
+):
+    pytester.makepyfile(
         """
         import pytest
         pytest_plugins = 'pytest_github_actions_annotate_failures'
@@ -240,11 +260,11 @@ def test_annotation_fail_cwd(testdir: pytest.Testdir):
             assert 0
         """
     )
-    testdir.monkeypatch.setenv("GITHUB_ACTIONS", "true")
-    testdir.monkeypatch.setenv("GITHUB_WORKSPACE", os.path.dirname(str(testdir.tmpdir)))
-    testdir.mkdir("foo")
-    testdir.makefile(".ini", pytest="[pytest]\ntestpaths=..")
-    result = testdir.runpytest_subprocess("--rootdir=foo")
+    monkeypatch.setenv("GITHUB_ACTIONS", "true")
+    monkeypatch.setenv("GITHUB_WORKSPACE", str(pytester.path.parent))
+    pytester.mkdir("foo")
+    pytester.makefile(".ini", pytest="[pytest]\ntestpaths=..")
+    result = pytester.runpytest_subprocess("--rootdir=foo")
     result.stderr.fnmatch_lines(
         [
             "::error file=test_annotation_fail_cwd0/test_annotation_fail_cwd.py,line=5::test_fail*assert 0*",
@@ -252,8 +272,11 @@ def test_annotation_fail_cwd(testdir: pytest.Testdir):
     )
 
 
-def test_annotation_fail_runpath(testdir: pytest.Testdir):
-    testdir.makepyfile(
+def test_annotation_fail_runpath(
+    pytester: pytest.Pytester,
+    monkeypatch: pytest.MonkeyPatch,
+):
+    pytester.makepyfile(
         """
         import pytest
         pytest_plugins = 'pytest_github_actions_annotate_failures'
@@ -262,9 +285,9 @@ def test_annotation_fail_runpath(testdir: pytest.Testdir):
             assert 0
         """
     )
-    testdir.monkeypatch.setenv("GITHUB_ACTIONS", "true")
-    testdir.monkeypatch.setenv("PYTEST_RUN_PATH", "some_path")
-    result = testdir.runpytest_subprocess()
+    monkeypatch.setenv("GITHUB_ACTIONS", "true")
+    monkeypatch.setenv("PYTEST_RUN_PATH", "some_path")
+    result = pytester.runpytest_subprocess()
     result.stderr.fnmatch_lines(
         [
             "::error file=some_path/test_annotation_fail_runpath.py,line=5::test_fail*assert 0*",
@@ -272,8 +295,8 @@ def test_annotation_fail_runpath(testdir: pytest.Testdir):
     )
 
 
-def test_annotation_long(testdir: pytest.Testdir):
-    testdir.makepyfile(
+def test_annotation_long(pytester: pytest.Pytester, monkeypatch: pytest.MonkeyPatch):
+    pytester.makepyfile(
         """
         import pytest
         pytest_plugins = 'pytest_github_actions_annotate_failures'
@@ -294,18 +317,18 @@ def test_annotation_long(testdir: pytest.Testdir):
             assert f(x) == 3
         """
     )
-    testdir.monkeypatch.setenv("GITHUB_ACTIONS", "true")
-    result = testdir.runpytest_subprocess()
+    monkeypatch.setenv("GITHUB_ACTIONS", "true")
+    result = pytester.runpytest_subprocess()
     result.stderr.fnmatch_lines(
         [
             "::error file=test_annotation_long.py,line=17::test_fail*assert 8 == 3*where 8 = f(8)*",
         ]
     )
-    no_fnmatch_line(result, "::*assert x += 1*")
+    result.stderr.no_fnmatch_line("::*assert x += 1*")
 
 
-def test_class_method(testdir: pytest.Testdir):
-    testdir.makepyfile(
+def test_class_method(pytester: pytest.Pytester, monkeypatch: pytest.MonkeyPatch):
+    pytester.makepyfile(
         """
         import pytest
         pytest_plugins = 'pytest_github_actions_annotate_failures'
@@ -316,18 +339,18 @@ def test_class_method(testdir: pytest.Testdir):
                 assert x == 2
         """
     )
-    testdir.monkeypatch.setenv("GITHUB_ACTIONS", "true")
-    result = testdir.runpytest_subprocess()
+    monkeypatch.setenv("GITHUB_ACTIONS", "true")
+    result = pytester.runpytest_subprocess()
     result.stderr.fnmatch_lines(
         [
             "::error file=test_class_method.py,line=7::TestClass.test_method*assert 1 == 2*",
         ]
     )
-    no_fnmatch_line(result, "::*x = 1*")
+    result.stderr.no_fnmatch_line("::*x = 1*")
 
 
-def test_annotation_param(testdir: pytest.Testdir):
-    testdir.makepyfile(
+def test_annotation_param(pytester: pytest.Pytester, monkeypatch: pytest.MonkeyPatch):
+    pytester.makepyfile(
         """
         import pytest
         pytest_plugins = 'pytest_github_actions_annotate_failures'
@@ -342,8 +365,8 @@ def test_annotation_param(testdir: pytest.Testdir):
             assert a == b
         """
     )
-    testdir.monkeypatch.setenv("GITHUB_ACTIONS", "true")
-    result = testdir.runpytest_subprocess()
+    monkeypatch.setenv("GITHUB_ACTIONS", "true")
+    result = pytester.runpytest_subprocess()
     result.stderr.fnmatch_lines(
         [
             "::error file=test_annotation_param.py,line=11::test_param?other?1*assert 2 == 3*",
@@ -355,8 +378,8 @@ def test_annotation_param(testdir: pytest.Testdir):
     version.parse("9.0.0") > PYTEST_VERSION,
     reason="subtests are only supported in pytest 9+",
 )
-def test_annotation_subtest(testdir: pytest.Testdir):
-    testdir.makepyfile(
+def test_annotation_subtest(pytester: pytest.Pytester, monkeypatch: pytest.MonkeyPatch):
+    pytester.makepyfile(
         """
         import pytest
         pytest_plugins = 'pytest_github_actions_annotate_failures'
@@ -367,8 +390,10 @@ def test_annotation_subtest(testdir: pytest.Testdir):
                     assert i % 2 == 0
         """
     )
-    testdir.monkeypatch.setenv("GITHUB_ACTIONS", "true")
-    result = testdir.runpytest_subprocess()
+    monkeypatch.setenv("GITHUB_ACTIONS", "true")
+    result = pytester.runpytest_subprocess()
+
+    assert len(result.stderr.lines) == 2
     result.stderr.fnmatch_lines(
         [
             "::error file=test_annotation_subtest.py,line=7::test *custom message* *i=1*assert (1 %25 2) == 0*",
