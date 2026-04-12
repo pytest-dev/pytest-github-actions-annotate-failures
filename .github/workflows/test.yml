@@ -38,7 +38,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
           allow-prereleases: true
 
-      - uses: astral-sh/setup-uv@v7
+      - uses: astral-sh/setup-uv@v8.0.0
 
       - name: Install tox
         run: uv tool install --with tox-gh-actions --with tox-uv tox
