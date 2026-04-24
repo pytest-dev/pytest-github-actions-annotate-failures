@@ -213,6 +213,28 @@ def test_annotation_third_party_warning(testdir: pytest.Testdir):
     )
 
 
+def test_annotation_warning_runpath(testdir: pytest.Testdir):
+    testdir.makepyfile(
+        """
+        import warnings
+        import pytest
+        pytest_plugins = 'pytest_github_actions_annotate_failures'
+
+        def test_warning():
+            warnings.warn('beware', Warning)
+            assert 1
+        """
+    )
+    testdir.monkeypatch.setenv("GITHUB_ACTIONS", "true")
+    testdir.monkeypatch.setenv("PYTEST_RUN_PATH", "some_path")
+    result = testdir.runpytest_subprocess()
+    result.stderr.fnmatch_lines(
+        [
+            "::warning file=some_path/test_annotation_warning_runpath.py,line=6::beware",
+        ]
+    )
+
+
 def test_annotation_fail_disabled_outside_workflow(testdir: pytest.Testdir):
     testdir.makepyfile(
         """

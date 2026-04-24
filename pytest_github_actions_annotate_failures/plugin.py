@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import contextlib
 import os
 import sys
 from typing import TYPE_CHECKING
@@ -110,25 +109,9 @@ class _AnnotateWarnings:
         if os.environ.get("GITHUB_ACTIONS") != "true":
             return
 
-        filesystempath = warning_message.filename
-        workspace = os.environ.get("GITHUB_WORKSPACE")
-
-        if workspace:
-            try:
-                rel_path = os.path.relpath(filesystempath, workspace)
-            except ValueError:
-                # os.path.relpath() will raise ValueError on Windows
-                # when full_path and workspace have different mount points.
-                rel_path = filesystempath
-            if not rel_path.startswith(".."):
-                filesystempath = rel_path
-        else:
-            with contextlib.suppress(ValueError):
-                filesystempath = os.path.relpath(filesystempath)
-
         workflow_command = _build_workflow_command(
             "warning",
-            filesystempath,
+            compute_path(os.path.relpath(warning_message.filename)),
             warning_message.lineno,
             message=str(warning_message.message),
         )
