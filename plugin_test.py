@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+from collections import Counter
 
 import pytest
 from packaging import version
@@ -397,6 +398,30 @@ def test_annotation_subtest(testdir: pytest.Testdir):
             "::error file=test_annotation_subtest.py,line=7::test *custom message* *i=3*assert (3 %25 2) == 0*",
         ]
     )
+
+
+def test_with_xdist(testdir: pytest.Testdir):
+    testdir.makepyfile(
+        """
+        import pytest
+        import warnings
+        import sys
+        pytest_plugins = ['pytest_github_actions_annotate_failures','xdist']
+
+        @pytest.mark.parametrize("n", range(10))
+        def test_fails(n):
+            warnings.warn(f"running {n}th")
+            assert n == 100
+        """
+    )
+    testdir.monkeypatch.setenv("GITHUB_ACTIONS", "true")
+    result = testdir.runpytest_subprocess("-n", "10", "-s")
+    lines = Counter(
+        line for line in result.errlines if line.startswith(("::error ", "::warning "))
+    )
+
+    assert len(lines) == 20
+    assert {*lines.values()} == {1}
 
 
 # Debugging / development tip:
