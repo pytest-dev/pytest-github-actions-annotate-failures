@@ -26,52 +26,53 @@ if TYPE_CHECKING:
 PYTEST_VERSION = version.parse(pytest.__version__)
 
 
-@pytest.hookimpl(tryfirst=True)
-def pytest_runtest_logreport(report: TestReport):
-    """Handle test reporting for all pytest versions."""
+class _AnnotateErrors:
+    @pytest.hookimpl(tryfirst=True)
+    def pytest_runtest_logreport(self, report: TestReport):
+        """Handle test reporting for all pytest versions."""
 
-    # enable only in a workflow of GitHub Actions
-    # ref: https://help.github.com/en/actions/configuring-and-managing-workflows/using-environment-variables#default-environment-variables
-    if os.environ.get("GITHUB_ACTIONS") != "true":
-        return
+        # enable only in a workflow of GitHub Actions
+        # ref: https://help.github.com/en/actions/configuring-and-managing-workflows/using-environment-variables#default-environment-variables
+        if os.environ.get("GITHUB_ACTIONS") != "true":
+            return
 
-    # Only handle failed tests in call phase
-    if report.when == "call" and report.failed:
-        filesystempath, lineno, _ = report.location
+        # Only handle failed tests in call phase
+        if report.when == "call" and report.failed:
+            filesystempath, lineno, _ = report.location
 
-        if lineno is not None:
-            # 0-index to 1-index
-            lineno += 1
+            if lineno is not None:
+                # 0-index to 1-index
+                lineno += 1
 
-        longrepr = report.head_line or "test"
+            longrepr = report.head_line or "test"
 
-        # get the error message and line number from the actual error
-        if isinstance(report.longrepr, ExceptionRepr):
-            if report.longrepr.reprcrash is not None:
-                longrepr += "\n\n" + report.longrepr.reprcrash.message
-            tb_entries = report.longrepr.reprtraceback.reprentries
-            if tb_entries:
-                entry = tb_entries[0]
-                # Handle third-party exceptions
-                if isinstance(entry, ReprEntry) and entry.reprfileloc is not None:
-                    lineno = entry.reprfileloc.lineno
-                    filesystempath = entry.reprfileloc.path
+            # get the error message and line number from the actual error
+            if isinstance(report.longrepr, ExceptionRepr):
+                if report.longrepr.reprcrash is not None:
+                    longrepr += "\n\n" + report.longrepr.reprcrash.message
+                tb_entries = report.longrepr.reprtraceback.reprentries
+                if tb_entries:
+                    entry = tb_entries[0]
+                    # Handle third-party exceptions
+                    if isinstance(entry, ReprEntry) and entry.reprfileloc is not None:
+                        lineno = entry.reprfileloc.lineno
+                        filesystempath = entry.reprfileloc.path
 
-            elif report.longrepr.reprcrash is not None:
-                lineno = report.longrepr.reprcrash.lineno
-        elif isinstance(report.longrepr, tuple):
-            filesystempath, lineno, message = report.longrepr
-            longrepr += "\n\n" + message
-        elif isinstance(report.longrepr, str):
-            longrepr += "\n\n" + report.longrepr
+                elif report.longrepr.reprcrash is not None:
+                    lineno = report.longrepr.reprcrash.lineno
+            elif isinstance(report.longrepr, tuple):
+                filesystempath, lineno, message = report.longrepr
+                longrepr += "\n\n" + message
+            elif isinstance(report.longrepr, str):
+                longrepr += "\n\n" + report.longrepr
 
-        workflow_command = _build_workflow_command(
-            "error",
-            compute_path(filesystempath),
-            lineno,
-            message=longrepr,
-        )
-        print(workflow_command, file=sys.stderr)
+            workflow_command = _build_workflow_command(
+                "error",
+                compute_path(filesystempath),
+                lineno,
+                message=longrepr,
+            )
+            print(workflow_command, file=sys.stderr)
 
 
 def compute_path(filesystempath: str) -> str:
@@ -129,8 +130,16 @@ def pytest_addoption(parser):
 
 
 def pytest_configure(config):
+    # Plugins should not be registered for workers.
+    # On xdist workers the controller re-emits reports,
+    # so register only there to avoid duplicates.
+    if config.pluginmanager.hasplugin("xdist") and hasattr(config, "workerinput"):
+        return
+
     if not config.option.exclude_warning_annotations:
         config.pluginmanager.register(_AnnotateWarnings(), "annotate_warnings")
+
+    config.pluginmanager.register(_AnnotateErrors(), "annotate_errors")
 
 
 def _build_workflow_command(
