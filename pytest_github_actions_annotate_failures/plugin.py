@@ -6,7 +6,6 @@ from typing import TYPE_CHECKING
 
 import pytest
 from _pytest._code.code import ExceptionRepr, ReprEntry
-from packaging import version
 
 if TYPE_CHECKING:
     from warnings import WarningMessage
@@ -21,9 +20,6 @@ if TYPE_CHECKING:
 #
 # Inspired by:
 # https://github.com/pytest-dev/pytest/blob/master/src/_pytest/terminal.py
-
-
-PYTEST_VERSION = version.parse(pytest.__version__)
 
 
 class _AnnotateErrors:
@@ -125,7 +121,7 @@ def pytest_addoption(parser):
         "--exclude-warning-annotations",
         action="store_true",
         default=False,
-        help="Annotate failures in GitHub Actions.",
+        help="Exclude annotating warnings in GitHub Actions.",
     )
 
 
