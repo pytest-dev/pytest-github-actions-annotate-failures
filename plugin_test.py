@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import os
 from collections import Counter
 
 import pytest
@@ -154,7 +153,7 @@ def test_annotation_warning_cwd(
         """
     )
     monkeypatch.setenv("GITHUB_ACTIONS", "true")
-    monkeypatch.setenv("GITHUB_WORKSPACE", os.path.dirname(str(pytester.path)))
+    monkeypatch.setenv("GITHUB_WORKSPACE", str(pytester.path.parent))
     pytester.mkdir("foo")
     pytester.makefile(".ini", pytest="[pytest]\ntestpaths=..")
     result = pytester.runpytest_subprocess("--rootdir=foo")
