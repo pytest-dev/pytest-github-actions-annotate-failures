@@ -125,7 +125,7 @@ def pytest_addoption(parser):
         "--exclude-warning-annotations",
         action="store_true",
         default=False,
-        help="Annotate failures in GitHub Actions.",
+        help="Exclude annotating warnings in GitHub Actions.",
     )
 
 
