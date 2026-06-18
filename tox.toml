@@ -1,0 +1,35 @@
+requires = [
+    "tox>=4.49",
+    "tox-uv",
+]
+env_list = [
+    { product = [
+        { prefix = "py3", start = 10 },
+        ["pytest"],
+        { pytestver = ["7", "8", "9"] },
+    ] },
+]
+
+[env_run_base]
+description = "run tests with Python {py_dot_ver} and pytest {factor:pytestver}"
+deps = [
+    { replace = "if", condition = "factor['9']", then = [
+      "pytest>=9.0.0,<10.0.0",
+    ], extend = true },
+    { replace = "if", condition = "factor['8']", then = [
+      "pytest>=8.0.0,<9.0.0",
+    ], extend = true },
+    { replace = "if", condition = "factor['7']", then = [
+      "pytest>=7.0.0,<8.0.0",
+      "pytest-rerunfailures<16.2",
+    ], extend = true },
+]
+dependency_groups = ["test"]
+commands = [
+    [
+        "{envpython}",
+        "-m",
+        "pytest",
+        { replace = "posargs", default = [], extend = true },
+    ],
+]
