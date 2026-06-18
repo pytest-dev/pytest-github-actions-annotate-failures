@@ -451,6 +451,86 @@ def test_with_xdist(pytester: pytest.Pytester, monkeypatch: pytest.MonkeyPatch):
     assert {*lines.values()} == {1}
 
 
+def test_annotation_rerunfailures_all_fail(testdir: pytest.Testdir):
+    """Intermediate rerun failures should also be annotated."""
+    testdir.makepyfile(
+        """
+        import pytest
+        pytest_plugins = ['pytest_github_actions_annotate_failures', 'rerunfailures']
+
+        def test_always_fails():
+            assert 0
+        """
+    )
+    testdir.monkeypatch.setenv("GITHUB_ACTIONS", "true")
+    result = testdir.runpytest_subprocess("--reruns", "2")
+    lines = [
+        line
+        for line in result.errlines
+        if line.startswith("::error file=test_annotation_rerunfailures_all_fail.py")
+    ]
+    # 1 initial run + 2 reruns = 3 annotations
+    assert len(lines) == 3
+
+
+def test_annotation_rerunfailures_eventually_passes(testdir: pytest.Testdir):
+    """Failures before a test eventually passes should still be annotated."""
+    testdir.makepyfile(
+        """
+        import pytest
+        pytest_plugins = ['pytest_github_actions_annotate_failures', 'rerunfailures']
+
+        _attempt = 0
+
+        def test_flaky():
+            global _attempt
+            _attempt += 1
+            assert _attempt >= 2
+        """
+    )
+    testdir.monkeypatch.setenv("GITHUB_ACTIONS", "true")
+    result = testdir.runpytest_subprocess("--reruns", "2")
+    lines = [
+        line
+        for line in result.errlines
+        if line.startswith(
+            "::error file=test_annotation_rerunfailures_eventually_passes.py"
+        )
+    ]
+    # 1 initial failure, then passes on second attempt → 1 annotation
+    assert len(lines) == 1
+
+
+def test_with_xdist_and_rerunfailures(
+    pytester: pytest.Pytester, monkeypatch: pytest.MonkeyPatch
+):
+    """Rerun annotations are emitted when xdist and rerunfailures are used together.
+
+    Under xdist, workers handle reruns and forward each rerun report to the
+    controller. The plugin is only registered on the controller, so the
+    controller's pytest_runtest_logreport sees both the intermediate 'rerun'
+    outcomes and the final 'failed' outcome — exactly once each.
+    """
+    pytester.makepyfile(
+        """
+        import pytest
+        pytest_plugins = ['pytest_github_actions_annotate_failures', 'xdist', 'rerunfailures']
+
+        def test_always_fails():
+            assert 0
+        """
+    )
+    monkeypatch.setenv("GITHUB_ACTIONS", "true")
+    result = pytester.runpytest_subprocess("-n", "1", "--reruns", "2")
+    lines = [
+        line
+        for line in result.errlines
+        if line.startswith("::error file=test_with_xdist_and_rerunfailures.py")
+    ]
+    # 1 initial run + 2 reruns = 3 annotations, no duplicates
+    assert len(lines) == 3
+
+
 # Debugging / development tip:
 # Add a breakpoint() to the place you are going to check,
 # uncomment this example, and run it with:

@@ -47,20 +47,20 @@ jobs:
         run: tox
         env:
           PYTEST_MAJOR_VERSION: 9
-          PYTEST_PLUGINS: pytest_github_actions_annotate_failures,xdist
+          PYTEST_PLUGINS: pytest_github_actions_annotate_failures,rerunfailures,xdist
 
       - name: Run tests with PyTest 8
         run: tox
         env:
           PYTEST_MAJOR_VERSION: 8
-          PYTEST_PLUGINS: pytest_github_actions_annotate_failures,xdist
+          PYTEST_PLUGINS: pytest_github_actions_annotate_failures,rerunfailures,xdist
 
       - name: Run tests with PyTest 7
         run: tox
         if: runner.os != 'Windows'
         env:
           PYTEST_MAJOR_VERSION: 7
-          PYTEST_PLUGINS: pytest_github_actions_annotate_failures,xdist
+          PYTEST_PLUGINS: pytest_github_actions_annotate_failures,rerunfailures,xdist
 
   post-test:
     name: All tests passed

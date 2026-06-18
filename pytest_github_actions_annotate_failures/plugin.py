@@ -32,8 +32,9 @@ class _AnnotateErrors:
         if os.environ.get("GITHUB_ACTIONS") != "true":
             return
 
-        # Only handle failed tests in call phase
-        if report.when == "call" and report.failed:
+        # Only handle failed tests in call phase.
+        # Also handle 'rerun' outcome set by pytest-rerunfailures on intermediate failures.
+        if report.when == "call" and (report.failed or report.outcome == "rerun"):
             filesystempath, lineno, _ = report.location
 
             if lineno is not None:
