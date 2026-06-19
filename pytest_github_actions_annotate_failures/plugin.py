@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import contextlib
 import os
 import sys
 from typing import TYPE_CHECKING
@@ -107,9 +108,13 @@ class _AnnotateWarnings:
         if os.environ.get("GITHUB_ACTIONS") != "true":
             return
 
+        filesystempath = warning_message.filename
+        with contextlib.suppress(ValueError):
+            filesystempath = os.path.relpath(filesystempath)
+
         workflow_command = _build_workflow_command(
             "warning",
-            compute_path(os.path.relpath(warning_message.filename)),
+            compute_path(filesystempath),
             warning_message.lineno,
             message=str(warning_message.message),
         )
