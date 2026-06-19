@@ -1,9 +1,14 @@
 from __future__ import annotations
 
+import io
+import sys
+import warnings
 from collections import Counter
 
 import pytest
 from packaging import version
+
+from pytest_github_actions_annotate_failures.plugin import _AnnotateWarnings
 
 PYTEST_VERSION = version.parse(pytest.__version__)
 pytest_plugins = "pytester"
@@ -250,6 +255,42 @@ def test_annotation_warning_runpath(
             "::warning file=some_path/test_annotation_warning_runpath.py,line=6::beware",
         ]
     )
+
+
+def test_annotation_warning_cross_drive(monkeypatch: pytest.MonkeyPatch):
+    """Regression: os.path.relpath() raises ValueError on Windows when warning
+    filename and CWD are on different drive letters; must not produce INTERNALERROR."""
+
+    monkeypatch.setenv("GITHUB_ACTIONS", "true")
+    monkeypatch.delenv("GITHUB_WORKSPACE", raising=False)
+    monkeypatch.delenv("PYTEST_RUN_PATH", raising=False)
+
+    def _cross_drive_relpath(path, start=None):  # noqa: ARG001
+        msg = "path is on mount 'C:', start on mount 'D:'"
+        raise ValueError(msg)
+
+    monkeypatch.setattr("os.path.relpath", _cross_drive_relpath)
+
+    w = warnings.WarningMessage(
+        UserWarning("beware"),
+        UserWarning,
+        r"C:\some\path\test_file.py",
+        42,
+    )
+
+    captured = io.StringIO()
+    monkeypatch.setattr(sys, "stderr", captured)
+
+    _AnnotateWarnings().pytest_warning_recorded(
+        w,
+        when="call",
+        nodeid="test_file.py::test_fn",
+        location=("test_file.py", 42, "test_fn"),
+    )
+
+    output = captured.getvalue()
+    assert "::warning" in output
+    assert "beware" in output
 
 
 def test_annotation_fail_disabled_outside_workflow(
