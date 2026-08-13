@@ -6,7 +6,19 @@ on:
   pull_request_target:
     types: [opened, labeled, unlabeled, synchronize]
 
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   ack:
-    uses: ansible/team-devtools/.github/workflows/ack.yml@main
+    name: Acknowledge pull request
+    # Permissions come from the called workflow; a caller cannot grant less.
+    permissions:
+      checks: write  # required to report the label check
+      contents: write  # required to update the draft release
+      pull-requests: write  # required to comment, approve, and merge
+    uses: ansible/team-devtools/.github/workflows/ack.yml@e7604b7f0f487584a2264c09a0df1524fe2be49e # v26.4.0
     secrets: inherit

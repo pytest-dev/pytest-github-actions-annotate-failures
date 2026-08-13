@@ -11,11 +11,14 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+permissions: {}
+
 env:
   FORCE_COLOR: "1"
 
 jobs:
   test:
+    permissions: {}
     strategy:
       fail-fast: false
       matrix:
@@ -30,15 +33,17 @@ jobs:
 
     name: ${{ matrix.os }}, Python ${{ matrix.python-version }}
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v7
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version: ${{ matrix.python-version }}
           allow-prereleases: true
 
-      - uses: astral-sh/setup-uv@v9.0.0
+      - uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
 
       - name: Install tox
         run: uv tool install --with tox-uv tox
@@ -66,10 +71,11 @@ jobs:
     name: All tests passed
     if: always()
     needs: [test]
+    permissions: {}
     runs-on: ubuntu-latest
     timeout-minutes: 2
     steps:
       - name: Decide whether the needed jobs succeeded or failed
-        uses: re-actors/alls-green@release/v1
+        uses: re-actors/alls-green@05ac9388f0aebcb5727afa17fcccfecd6f8ec5fe # v1.2.2
         with:
           jobs: ${{ toJSON(needs) }}

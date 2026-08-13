@@ -8,6 +8,17 @@ name: push
       - "releases/**"
       - "stable/**"
 
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
   ack:
-    uses: ansible/team-devtools/.github/workflows/push.yml@main
+    name: Update release draft
+    # Permissions come from the called workflow; a caller cannot grant less.
+    permissions:
+      contents: write  # required to update the draft release
+      pull-requests: read  # required to collect the release notes
+    uses: ansible/team-devtools/.github/workflows/push.yml@e7604b7f0f487584a2264c09a0df1524fe2be49e # v26.4.0
