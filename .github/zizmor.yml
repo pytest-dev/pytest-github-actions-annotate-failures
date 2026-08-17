@@ -1,0 +1,17 @@
+rules:
+  # The shared ansible/team-devtools workflow needs pull_request_target to
+  # label and approve pull requests from forks. It does not check out the
+  # pull request code.
+  dangerous-triggers:
+    ignore:
+      - ack.yml
+  # The called workflow reads an optional bot token from the organization
+  # secrets, so the secrets cannot be listed one by one here.
+  secrets-inherit:
+    ignore:
+      - ack.yml
+  # Trusted publishing needs configuration on PyPI, which only a maintainer
+  # can do. Change this in a different pull request.
+  use-trusted-publishing:
+    ignore:
+      - deploy.yml
