@@ -9,6 +9,8 @@ updates:
       github-actions:
         patterns:
           - "*"
+    cooldown:
+      default-days: 7
   # Maintain dependencies for pre-commit hooks
   - package-ecosystem: "pre-commit"
     directory: "/"
@@ -18,3 +20,5 @@ updates:
       hooks:
         patterns:
           - "*"
+    cooldown:
+      default-days: 7
