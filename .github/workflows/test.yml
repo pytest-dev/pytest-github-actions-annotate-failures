@@ -29,6 +29,7 @@ jobs:
           - "3.12"
           - "3.13"
           - "3.14"
+          - "3.15"
     runs-on: ${{ matrix.os }}
 
     name: ${{ matrix.os }}, Python ${{ matrix.python-version }}
