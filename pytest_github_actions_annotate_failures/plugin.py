@@ -13,6 +13,8 @@ if TYPE_CHECKING:
 
     from _pytest.reports import TestReport
 
+_ELLIPSIS = "..."
+
 
 # Reference:
 # https://docs.pytest.org/en/latest/writing_plugins.html#hookwrapper-executing-around-other-hooks
@@ -24,6 +26,9 @@ if TYPE_CHECKING:
 
 
 class _AnnotateErrors:
+    def __init__(self, max_annotation_length: int = 0) -> None:
+        self.max_annotation_length = max_annotation_length
+
     @pytest.hookimpl(tryfirst=True)
     def pytest_runtest_logreport(self, report: TestReport):
         """Handle test reporting for all pytest versions."""
@@ -68,7 +73,7 @@ class _AnnotateErrors:
                 "error",
                 compute_path(filesystempath),
                 lineno,
-                message=longrepr,
+                message=_truncate_message(longrepr, self.max_annotation_length),
             )
             print(workflow_command, file=sys.stderr)
 
@@ -96,6 +101,9 @@ def compute_path(filesystempath: str) -> str:
 
 
 class _AnnotateWarnings:
+    def __init__(self, max_annotation_length: int = 0) -> None:
+        self.max_annotation_length = max_annotation_length
+
     def pytest_warning_recorded(
         self,
         warning_message: WarningMessage,
@@ -116,7 +124,9 @@ class _AnnotateWarnings:
             "warning",
             compute_path(filesystempath),
             warning_message.lineno,
-            message=str(warning_message.message),
+            message=_truncate_message(
+                str(warning_message.message), self.max_annotation_length
+            ),
         )
         print(workflow_command, file=sys.stderr)
 
@@ -129,6 +139,16 @@ def pytest_addoption(parser):
         default=False,
         help="Exclude annotating warnings in GitHub Actions.",
     )
+    group.addoption(
+        "--github-annotation-max-length",
+        action="store",
+        default=0,
+        type=int,
+        help=(
+            "Maximum length of GitHub Actions annotation messages. "
+            "Use 0 to disable truncation."
+        ),
+    )
 
 
 def pytest_configure(config):
@@ -138,10 +158,19 @@ def pytest_configure(config):
     if config.pluginmanager.hasplugin("xdist") and hasattr(config, "workerinput"):
         return
 
-    if not config.option.exclude_warning_annotations:
-        config.pluginmanager.register(_AnnotateWarnings(), "annotate_warnings")
+    max_annotation_length = config.option.github_annotation_max_length
+    if max_annotation_length < 0:
+        msg = "--github-annotation-max-length must be greater than or equal to 0"
+        raise pytest.UsageError(msg)
 
-    config.pluginmanager.register(_AnnotateErrors(), "annotate_errors")
+    if not config.option.exclude_warning_annotations:
+        config.pluginmanager.register(
+            _AnnotateWarnings(max_annotation_length), "annotate_warnings"
+        )
+
+    config.pluginmanager.register(
+        _AnnotateErrors(max_annotation_length), "annotate_errors"
+    )
 
 
 def _build_workflow_command(
@@ -176,3 +205,13 @@ def _build_workflow_command(
 
 def _escape(s: str) -> str:
     return s.replace("%", "%25").replace("\r", "%0D").replace("\n", "%0A")
+
+
+def _truncate_message(message: str, max_length: int) -> str:
+    if max_length <= 0 or len(message) <= max_length:
+        return message
+
+    if max_length <= len(_ELLIPSIS):
+        return _ELLIPSIS[:max_length]
+
+    return message[: max_length - len(_ELLIPSIS)] + _ELLIPSIS
