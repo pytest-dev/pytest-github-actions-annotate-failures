@@ -11,6 +11,8 @@ updates:
           - "*"
     cooldown:
       default-days: 7
+    labels:
+      - skip-changelog
   # Maintain dependencies for pre-commit hooks
   - package-ecosystem: "pre-commit"
     directory: "/"
@@ -22,3 +24,5 @@ updates:
           - "*"
     cooldown:
       default-days: 7
+    labels:
+      - skip-changelog
