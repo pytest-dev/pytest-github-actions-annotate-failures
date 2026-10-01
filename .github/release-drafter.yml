@@ -1,3 +1,27 @@
 ---
 # https://github.com/ansible/team-devtools — Release Drafter v7 needs repo:path for _extends
 _extends: ansible/team-devtools:/.github/release-drafter.yml
+
+categories:
+  - type: 'pre-exclude'
+    when:
+      label: 'skip-changelog'
+  - title: Breaking
+    labels:
+      - breaking
+  - title: Features
+    labels:
+      - feat # 006b75
+  - title: Fixes
+    labels:
+      - docs
+      - fix # fbca04
+      - perf
+      - refactor
+  - title: Maintenance # fef2c0
+    labels:
+      - build
+      - chore
+      - ci
+      - style
+      - test
