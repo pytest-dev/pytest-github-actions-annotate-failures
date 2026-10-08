@@ -4,13 +4,18 @@ import io
 import sys
 import warnings
 from collections import Counter
+from pathlib import Path
 
 import pytest
 from packaging import version
 
-from pytest_github_actions_annotate_failures.plugin import _AnnotateWarnings
+from pytest_github_actions_annotate_failures.plugin import (
+    _AnnotateWarnings,
+    _truncate_message,
+)
 
 PYTEST_VERSION = version.parse(pytest.__version__)
+REPO_ROOT = Path(__file__).parent
 pytest_plugins = "pytester"
 
 
@@ -391,6 +396,47 @@ def test_annotation_long(pytester: pytest.Pytester, monkeypatch: pytest.MonkeyPa
         ]
     )
     result.stderr.no_fnmatch_line("::*assert x += 1*")
+
+
+def test_truncate_message():
+    assert _truncate_message("abc", 0) == "abc"
+    assert _truncate_message("abc", 3) == "abc"
+    assert _truncate_message("abcdef", 5) == "ab..."
+    assert _truncate_message("abcdef", 2) == ".."
+
+
+def test_annotation_fail_with_max_length(
+    pytester: pytest.Pytester,
+    monkeypatch: pytest.MonkeyPatch,
+):
+    pytester.makepyfile(
+        """
+        import pytest
+
+        def test_fail():
+            assert False, "x" * 1000
+        """
+    )
+    monkeypatch.setenv("GITHUB_ACTIONS", "true")
+    monkeypatch.setenv("PYTHONPATH", str(REPO_ROOT))
+    result = pytester.runpytest_subprocess("--github-annotation-max-length=80")
+    lines = [line for line in result.errlines if line.startswith("::error ")]
+
+    assert len(lines) == 1
+    annotation_message = lines[0].split("::", 2)[2].replace("%0A", "\n")
+    assert len(annotation_message) == 80
+    assert annotation_message.endswith("...")
+    assert "x" * 100 not in annotation_message
+
+
+def test_annotation_max_length_rejects_negative(
+    pytester: pytest.Pytester, monkeypatch: pytest.MonkeyPatch
+):
+    monkeypatch.setenv("PYTHONPATH", str(REPO_ROOT))
+    result = pytester.runpytest_subprocess("--github-annotation-max-length=-1")
+    result.stderr.fnmatch_lines(
+        ["ERROR: --github-annotation-max-length must be greater than or equal to 0"]
+    )
 
 
 def test_class_method(pytester: pytest.Pytester, monkeypatch: pytest.MonkeyPatch):

@@ -36,6 +36,8 @@ If your test is running in a Docker container, you have to install this plugin a
 
 If your tests are run from a subdirectory of the git repository, you have to set the `PYTEST_RUN_PATH` environment variable to the path of that directory relative to the repository root in order for GitHub to identify the files with errors correctly.
 
+To keep GitHub Actions annotations concise, pass `--github-annotation-max-length=N` to truncate annotation messages longer than `N` characters. The default value is `0`, which disables truncation.
+
 ### Warning annotations
 
 This plugin also supports warning annotations when used with Pytest 6.0+. To disable warning annotations, pass `--exclude-warning-annotations` to pytest.
