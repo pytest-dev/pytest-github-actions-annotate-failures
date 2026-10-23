@@ -52,20 +52,20 @@ jobs:
       - name: Run tests with PyTest 9
         run: tox
         env:
-          TOXENV: ${{ matrix.python-version }}-pytest-9
+          TOXENV: ${{ matrix.python-version }}-pytest9
           PYTEST_PLUGINS: pytest_github_actions_annotate_failures,rerunfailures,xdist
 
       - name: Run tests with PyTest 8
         run: tox
         env:
-          TOXENV: ${{ matrix.python-version }}-pytest-8
+          TOXENV: ${{ matrix.python-version }}-pytest8
           PYTEST_PLUGINS: pytest_github_actions_annotate_failures,rerunfailures,xdist
 
       - name: Run tests with PyTest 7
         run: tox
         if: runner.os != 'Windows'
         env:
-          TOXENV: ${{ matrix.python-version }}-pytest-7
+          TOXENV: ${{ matrix.python-version }}-pytest7
           PYTEST_PLUGINS: pytest_github_actions_annotate_failures,rerunfailures,xdist
 
   post-test:
