@@ -6,7 +6,11 @@ readme = "README.md"
 requires-python = ">=3.10"
 license = "MIT"
 authors = [{ "name" = "utgwkk", "email" = "utagawakiki@gmail.com" }]
-maintainers = [{ "name" = "utgwkk", "email" = "utagawakiki@gmail.com" }]
+maintainers = [
+  { "name" = "utgwkk", "email" = "utagawakiki@gmail.com" },
+  { "name" = "Henry Schreiner", "email" = "henryschreineriii@gmail.com" },
+  { "name" = "Edgar Ramírez-Mondragón", "email" = "edgarrm358@gmail.com" },
+]
 keywords = ["plugin", "pytest", "testing"]
 classifiers = [
   "Development Status :: 5 - Production/Stable",
